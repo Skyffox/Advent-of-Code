@@ -1,3 +1,11 @@
+# Part 1: Work out the steps to release the most pressure in 30 minutes. What is the most pressure you can release?
+# Answer: 1915 
+
+# Part 2: With you and an elephant working together for 26 minutes, what is the most pressure you could release?
+# Answer: 2772
+
+# Execution time: 38.413s
+
 def solve2(flow, tunnels):
 
     states = [(1, "AA", "AA", 0, ("zzz",))]

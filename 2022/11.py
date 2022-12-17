@@ -1,9 +1,13 @@
+# Part 1: What is the level of monkey business after 20 rounds of stuff-slinging simian shenanigans?
+# Answer: 112221
+
+# Part 2: Worry levels are no longer divided by three after each item is inspected; you'll need to find another way to keep your worry levels manageable. 
+# Starting again from the initial state in your puzzle input, what is the level of monkey business after 10000 rounds?
+# Answer: ???
+
+# Execution time: ???
+
 import copy
-
-# CLEARED 1 STARS
-
-# Monkey number, [starting items], operation, test, true, false
-data = []
 
 
 def round(data, inspections):
@@ -55,7 +59,9 @@ def round(data, inspections):
     return inspections
 
 
-with open("11_input.txt") as f:
+# Monkey number, [starting items], operation, test, true, false
+data = []
+with open("inputs/11_input.txt") as f:
     lines = f.readlines()
     lines = [line.strip() for line in lines]
 

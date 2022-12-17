@@ -1,4 +1,10 @@
-data = []
+# Part 1: In the row where y=2000000, how many positions cannot contain a beacon?
+# Answer: 6078701
+
+# Part 2: Find the only possible position for the distress beacon. What is its tuning frequency?
+# Answer: 12567351400528
+
+# Execution time: 4.698s
 
 # See if range crosses the line and add coordinates
 def find(data, limit):
@@ -18,7 +24,6 @@ def seen_in_row(sensors, row):
         diff =  r - abs(row - sy)
         if diff >= 0:
             all_edges.append((sx-diff, sx+diff))
-    print(all_edges)
     return sorted(all_edges)
 
 
@@ -38,7 +43,8 @@ def part_2(sensors, limit):
             return limit * col + row
 
 
-with open("15_input.txt") as f:
+data = []
+with open("inputs/15_input.txt") as f:
     for line in f:
         line = line.strip().split("=")
 

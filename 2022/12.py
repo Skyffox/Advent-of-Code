@@ -1,7 +1,13 @@
-# CLEARED 0 STARS
+# Part 1: What is the fewest steps required to move from your current position to the location that should get the best signal?
+# Answer: ???
+
+# Part 2: ???
+# Answer: ???
+
+# Execution time: ???
 
 # Read all lines, get height and width and start and end positions
-with open('small_puzzle.txt') as f:
+with open('inputs/12_input.txt') as f:
     lines = [x.strip() for x in f.readlines()]
     width_map = len(lines)
     height_map = len(list(lines[0]))

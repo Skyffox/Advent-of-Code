@@ -1,4 +1,10 @@
-# CLEARED 2 STARS
+# Part 1: Find all of the directories with a total size of at most 100000. What is the sum of the total sizes of those directories?
+# Answer: 1583951
+
+# Part 2: Find the smallest directory that, if deleted, would free up enough space on the filesystem to run the update. What is the total size of that directory?
+# Answer: ???
+
+# Execution time: ???
 
 class Node(object):
     def __init__(self, path, size, parent):
@@ -16,7 +22,7 @@ class Node(object):
 root_node = Node("/", 0, None)
 current_node = root_node
 
-with open("7_input.txt") as f:
+with open("inputs/7_input.txt") as f:
     lst = []
     for line in f:
         line = line.strip().split(" ")

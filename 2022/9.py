@@ -1,3 +1,11 @@
+# Part 1: How many positions does the tail of the rope visit at least once?
+# Answer: 13
+
+# Part 2: Simulate your complete series of motions on a larger rope with ten knots. How many positions does the tail of the rope visit at least once?
+# Answer: ???
+
+# Execution time: ???
+
 # NOTE: only works with small grid
 def print_grid(min_x, min_y, max_x, max_y, headpos, tailpos, prev_tail_pos, command=None, part2=[]):
     if command is None:

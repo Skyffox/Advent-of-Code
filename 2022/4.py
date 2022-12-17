@@ -1,6 +1,12 @@
-# CLEARED 2 STARS
+# Part 1: In how many assignment pairs does one range fully contain the other?
+# Answer: 644
 
-with open("4_input.txt") as f:
+# Part 2: In how many assignment pairs do the ranges overlap?
+# Answer: 926
+
+# Execution time: 0.222s
+
+with open("inputs/4_input.txt") as f:
     count = 0
     count2 = 0
     for line in f:

@@ -1,10 +1,16 @@
-# CLEARED 2 STARS
+# Part 1: How many units of sand come to rest before sand starts flowing into the abyss below?
+# Answer: 728
+
+# Part 2: Using your scan, simulate the falling sand until the source of the sand becomes blocked. How many units of sand come to rest?
+# Answer: 27623
+
+# Execution time: 12.151s
 
 sand_start = [500, 0]
 canvas = []
 walls = []
 
-with open("14_input.txt") as f:
+with open("inputs/14_input.txt") as f:
     for line in f:
         line = line.strip().split(" -> ")
         line = [x.split(",") for x in line]
@@ -15,6 +21,7 @@ with open("14_input.txt") as f:
             if x == len(line) - 1:
                 break
 
+            # Find all the walls
             if line[x][0] != line[x+1][0]:
                 diff = abs(line[x][0] - line[x+1][0])
                 if line[x][0] > line[x+1][0]:
@@ -38,8 +45,8 @@ max_x = max([x[0] for x in walls])
 max_y = max([x[1] for x in walls])
 
 # ENABLE FOR PART 2
-# min_x -= 200
-# max_x += 200
+min_x -= 200
+max_x += 200
 
 # DRAW: rock as #, air as ., and the source of the sand as +
 for y in range(max_y + 1):
@@ -59,7 +66,6 @@ def sand_propagation():
     x = sand_start[0] - min_x
 
     while True:
-        # print(x, y, len(canvas), len(canvas[0]))
         if y > len(canvas)-2 or x < 0 or x > len(canvas[0]) - 1:
             return True
 
@@ -88,7 +94,6 @@ while True:
 
 # PART 2
 overflow_count = 0
-
 canvas.append([". " for _ in range(min_x, max_x + 1)])
 canvas.append(["# " for _ in range(min_x, max_x + 1)])
 

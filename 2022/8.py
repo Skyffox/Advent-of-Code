@@ -1,8 +1,13 @@
-# CLEARED 2 STARS
+# Part 1: How many trees are visible from outside the grid?
+# Answer: 1533
+
+# Part 2: What is the highest scenic score possible for any tree?
+# Answer: 345744
+
+# Execution time: 0.304s
 
 forest = []
-
-with open("8_input.txt") as f:
+with open("inputs/8_input.txt") as f:
     for line in f:
         line = line.strip()
         line = [int(x) for x in str(line)]
@@ -12,7 +17,7 @@ with open("8_input.txt") as f:
 visible_trees = len(forest) * 2 + len(forest[0]) * 2 - 4
 scenic_score = 0
 
-
+# Part 1
 for y in range(1, len(forest) - 1):
     for x in range(1, len(forest) - 1):
 
@@ -62,8 +67,7 @@ for y in range(1, len(forest) - 1):
 
 print("Number of trees viewable from the edge:", visible_trees)
 
-
-
+# Part 2
 for y in range(1, len(forest) - 1):
     for x in range(1, len(forest) - 1):
 

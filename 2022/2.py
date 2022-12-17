@@ -1,6 +1,11 @@
-# CLEARED 2 STARS
+# Part 1: What would your total score be if everything goes exactly according to your strategy guide?
+# Answer: 11666
 
-# PART 1
+# Part 2: Following the Elf's instructions for the second column, what would your total score be if everything goes exactly according to your strategy guide?
+# Answer: 12767
+
+# Execution time: 0.220s
+
 def part1(player, enemy):
     score = 0
     if enemy == "A":
@@ -29,7 +34,7 @@ def part1(player, enemy):
 
     return score
 
-# PART 2
+
 def part2(outcome, enemy):
     score = 0
     if enemy == "A":
@@ -58,7 +63,7 @@ def part2(outcome, enemy):
 
     return score
 
-with open("2_input.txt") as f:
+with open("inputs/2_input.txt") as f:
     score1 = 0
     score2 = 0
     for line in f:

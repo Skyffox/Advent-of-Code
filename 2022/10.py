@@ -1,4 +1,10 @@
-# CLEARED 2 STARS
+# Part 1: Find the signal strength during the 20th, 60th, 100th, 140th, 180th, and 220th cycles. What is the sum of these six signal strengths?
+# Answer: 13920
+
+# Part 2: Render the image given by your program. What eight capital letters appear on your CRT?
+# Answer: EGLHBLFJ
+
+# Execution time: 0.215s
 
 initial_value = 1
 counter = 1
@@ -7,7 +13,7 @@ total = 0
 message = []
 row = []
 
-with open("10_input.txt") as f:
+with open("inputs/10_input.txt") as f:
     for line in f:
         line = line.strip().split()
 
