@@ -4,8 +4,6 @@
 # Part 2: Find the only possible position for the distress beacon. What is its tuning frequency?
 # Answer: 12567351400528
 
-# Execution time: 4.698s
-
 # See if range crosses the line and add coordinates
 def find(data, limit):
     x_coors = set()

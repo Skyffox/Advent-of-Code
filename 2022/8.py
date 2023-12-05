@@ -4,15 +4,12 @@
 # Part 2: What is the highest scenic score possible for any tree?
 # Answer: 345744
 
-# Execution time: 0.304s
-
 forest = []
 with open("inputs/8_input.txt") as f:
     for line in f:
         line = line.strip()
         line = [int(x) for x in str(line)]
         forest.append(line)
-
 
 visible_trees = len(forest) * 2 + len(forest[0]) * 2 - 4
 scenic_score = 0

@@ -4,8 +4,6 @@
 # Part 2: In how many assignment pairs do the ranges overlap?
 # Answer: 926
 
-# Execution time: 0.222s
-
 with open("inputs/4_input.txt") as f:
     count = 0
     count2 = 0

@@ -5,10 +5,7 @@
 # Starting again from the initial state in your puzzle input, what is the level of monkey business after 10000 rounds?
 # Answer: ???
 
-# Execution time: ???
-
 import copy
-
 
 def round(data, inspections):
     for monkey in data:

@@ -3,5 +3,3 @@
 
 # Part 2:
 # Answer: 
-
-# Execution time: 

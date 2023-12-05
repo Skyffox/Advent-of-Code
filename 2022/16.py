@@ -4,8 +4,6 @@
 # Part 2: With you and an elephant working together for 26 minutes, what is the most pressure you could release?
 # Answer: 2772
 
-# Execution time: 38.413s
-
 def solve2(flow, tunnels):
 
     states = [(1, "AA", "AA", 0, ("zzz",))]
@@ -15,7 +13,6 @@ def solve2(flow, tunnels):
     max_flow = sum(flow.values())
 
     while len(states) > 0:
-
         current = states.pop()
         time, where, elephant, score, opened_s = current
         opened = {x for x in opened_s}

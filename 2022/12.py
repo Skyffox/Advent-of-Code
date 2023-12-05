@@ -4,8 +4,6 @@
 # Part 2: ???
 # Answer: ???
 
-# Execution time: ???
-
 # Read all lines, get height and width and start and end positions
 with open('inputs/12_input.txt') as f:
     lines = [x.strip() for x in f.readlines()]

@@ -4,8 +4,6 @@
 # Part 2: Find the item type that corresponds to the badges of each three-Elf group. What is the sum of the priorities of those item types?
 # Answer: 2790
 
-# Execution time: 0.219s
-
 # Split the string in two and find similar items.
 def part1(lines):
     s = 0

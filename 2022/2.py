@@ -4,8 +4,6 @@
 # Part 2: Following the Elf's instructions for the second column, what would your total score be if everything goes exactly according to your strategy guide?
 # Answer: 12767
 
-# Execution time: 0.220s
-
 def part1(player, enemy):
     score = 0
     if enemy == "A":

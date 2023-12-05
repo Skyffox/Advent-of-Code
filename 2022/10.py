@@ -4,8 +4,6 @@
 # Part 2: Render the image given by your program. What eight capital letters appear on your CRT?
 # Answer: EGLHBLFJ
 
-# Execution time: 0.215s
-
 initial_value = 1
 counter = 1
 cycles = [20, 60, 100, 140, 180, 220]

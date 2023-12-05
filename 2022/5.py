@@ -4,8 +4,6 @@
 # Part 2: After the rearrangement procedure completes, what crate ends up on top of each stack?
 # Answer: WJVRLSJJT
 
-# Execution time: 0.220s
-
 import copy
 
 stacks = [["F", "C", "P", "G", "Q", "R"],

@@ -4,8 +4,6 @@
 # Part 2: Using your scan, simulate the falling sand until the source of the sand becomes blocked. How many units of sand come to rest?
 # Answer: 27623
 
-# Execution time: 12.151s
-
 sand_start = [500, 0]
 canvas = []
 walls = []

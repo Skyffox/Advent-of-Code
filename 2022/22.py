@@ -4,4 +4,10 @@
 # Part 2:
 # Answer: 
 
-# Execution time: 
+with open("inputs/22_input.txt") as f:
+    for line in f:
+        print(line)
+        line = line.split(" ")
+        print(line)
+
+        instructions = line

@@ -4,8 +4,6 @@
 # Part 2: Find the top three Elves carrying the most Calories.
 # Answer: 210957
 
-# Execution time: 0.216s
-
 with open("inputs/1_input.txt") as f:  
     sums = []
     sum = 0
@@ -21,4 +19,4 @@ with open("inputs/1_input.txt") as f:
 newlst = sorted(sums, reverse=True)
 print("Maximum calories an elf brought is:", newlst[0])
 print("Calories of the top three elves:", newlst[0], newlst[1], newlst[2])
-print("Total:", newlst[0] + newlst[1] + newlst[2])
+print("Total top three:", newlst[0] + newlst[1] + newlst[2])
