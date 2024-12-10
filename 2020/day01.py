@@ -33,7 +33,7 @@ def part_1(lst: list) -> int:
 def part_2(lst: list) -> int:
     """Find 3 numbers that add up to 2020"""
     for idx, x in enumerate(lst):
-        for y in enumerate(lst[idx+1:]):
+        for y in lst[idx+1:]:
             for z in lst[idx+1:]:
                 if x + y + z == 2020:
                     return x * y * z

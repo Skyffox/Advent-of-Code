@@ -4,7 +4,7 @@ Part 1: Calculate the eventual frequency we end up on
 Answer: 505
 
 Part 2: Find the frequency we land on twice for the first time
-Answer: 72330 (take ~80 seconds)
+Answer: 72330
 """
 
 from utils import profiler
@@ -15,7 +15,6 @@ def get_input(file_path: str) -> tuple[list, list]:
     lst = []
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
-            # print(line)
             lst.append(int(line.strip()))
 
     return lst
@@ -30,14 +29,15 @@ def part_1(lst: list) -> int:
 @profiler
 def part_2(lst: list) -> int:
     """Return the frequency we have already seen"""
-    seen_frequencies = [0]
+    seen_frequencies = {0}
+    curr_freq = 0
     while True:
         for f in lst:
-            curr_freq = seen_frequencies[-1] + f
+            curr_freq += f
             if curr_freq in seen_frequencies:
                 return curr_freq
 
-            seen_frequencies.append(curr_freq)
+            seen_frequencies.add(curr_freq)
 
 
 if __name__ == "__main__":

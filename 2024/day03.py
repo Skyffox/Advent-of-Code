@@ -4,7 +4,7 @@ Part 1: Find all correct occurences of mul(number, number) in input
 Answer: 184511516
 
 Part 2: Do not execute mul() statements if a don't() came before it, we may execute again if we encounter a do() statement
-Answer: 121869966
+Answer: 90044227
 """
 
 import re
@@ -13,8 +13,12 @@ from utils import profiler
 
 def get_input(file_path: str) -> str:
     """Get the input data"""
+    lst = []
     with open(file_path, "r", encoding="utf-8") as file:
-        return "".join(file.readlines())
+        for line in file:
+            lst.append(line.strip())
+
+    return "".join(lst)
 
 
 @profiler

@@ -37,7 +37,6 @@ def part_1(lst: list) -> int:
 def part_2(lst: list) -> int:
     """Take 3 sublists and compare the indices of these sublists to form a triangle"""
     n = 0
-    print(lst)
     for i in range(len(lst) // 3):
         for j in range(3):
             # Determine the vertical values from the column

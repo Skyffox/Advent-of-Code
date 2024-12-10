@@ -100,5 +100,5 @@ if __name__ == "__main__":
     # Use same input for Part 2
     memory_cpy = memory[::]
 
-    print("Part 1:", part_1(memory, empty))
-    print("Part 2:", part_2(memory_cpy, memory_range, empty_range))
+    print(f"Part 1: {part_1(memory, empty)}")
+    print(f"Part 2: {part_2(memory_cpy, memory_range, empty_range)}")

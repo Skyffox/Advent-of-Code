@@ -72,5 +72,5 @@ if __name__ == "__main__":
     input_data, trailheads = get_input("inputs/10_input.txt")
 
     # Get solutions
-    print(f"Part 1 = {part_one(input_data, trailheads)}")
-    print(f"Part 2 = {part_two(input_data, trailheads)}")
+    print(f"Part 1: {part_one(input_data, trailheads)}")
+    print(f"Part 2: {part_two(input_data, trailheads)}")

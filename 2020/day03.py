@@ -57,6 +57,6 @@ def part_2(grid: list) -> int:
 
 if __name__ == "__main__":
     input_data = get_input("inputs/3_input.txt")
-    print(input_data)
+
     print(f"Part 1: {part_1(input_data)}")
     print(f"Part 2: {part_2(input_data)}")
