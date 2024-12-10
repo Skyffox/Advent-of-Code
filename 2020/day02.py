@@ -1,29 +1,60 @@
-# Part 1: Find how many passwords are valid
-# Answer: 645
+# pylint: disable=line-too-long
+"""
+Part 1: Find how many passwords are valid
+Answer: 645
 
-# Part 2: The password policy was wrong and the first part of the rule was actually the index at which this letter must occur
-# Answer: 737
+Part 2: The password policy was wrong and the first part of the rule was actually the index at which this letter must occur
+Answer: 737
+"""
+
+from utils import profiler
 
 
-n, n2 = 0, 0
-with open("inputs/2_input.txt") as f:
-    for line in f:
-        line = line.strip().split(":")
+def get_input(file_path: str) -> list:
+    """Get the input data"""
+    lst = []
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip().split(":")
 
-        rule = line[0].split(" ")
-        lowerbound, upperbound = rule[0].split("-")
-        lowerbound, upperbound = int(lowerbound), int(upperbound)
-        password = line[1].strip()
+            rule = line[0].split(" ")
+            lowerbound, upperbound = rule[0].split("-")
+            lowerbound, upperbound = int(lowerbound), int(upperbound)
+            password = line[1].strip()
 
-        # Part 1
-        if sum([1 for x in password if x == rule[1]]) in range(lowerbound, upperbound + 1):
+            lst.append([rule, lowerbound, upperbound, password])
+
+    return lst
+
+
+@profiler
+def part_1(lst: list) -> int:
+    """a"""
+    n = 0
+    for line in lst:
+        rule, lower_b, upper_b, pw = line
+        if sum([1 for x in pw if x == rule[1]]) in range(lower_b, upper_b + 1):
             n += 1
 
-        # Part 2
-        # They do not have a zero-index policy
-        if (password[lowerbound - 1] == rule[1] and password[lowerbound - 1] != password[upperbound - 1]) or \
-           (password[upperbound - 1] == rule[1] and password[lowerbound - 1] != password[upperbound - 1]):
-            n2 += 1
+    return n
 
-print("Part 1:", n)
-print("Part 1:", n2)
+
+@profiler
+def part_2(lst: list) -> int:
+    """a"""
+    n = 0
+    for line in lst:
+        rule, lower_b, upper_b, pw = line
+        # bla
+        if (pw[lower_b - 1] == rule[1] and pw[lower_b - 1] != pw[upper_b - 1]) or \
+           (pw[upper_b - 1] == rule[1] and pw[lower_b - 1] != pw[upper_b - 1]):
+            n += 1
+
+    return n
+
+
+if __name__ == "__main__":
+    input_data = get_input("inputs/2_input.txt")
+
+    print(f"Part 1: {part_1(input_data)}")
+    print(f"Part 2: {part_2(input_data)}")

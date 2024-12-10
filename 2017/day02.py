@@ -1,27 +1,47 @@
-# Part 1: Find the differences between the biggest and smallest number of each row
-# Answer: 47136
+# pylint: disable=line-too-long
+"""
+Part 1: Find the differences between the biggest and smallest number of each row
+Answer: 47136
 
-# Part 2: See what numbers create an integer when dividing in that same row
-# Answer: 250
+Part 2: See what numbers create an integer when dividing in that same row
+Answer: 250
+"""
+
+from utils import profiler
 
 
-checksum = 0
-res = 0
-with open("inputs/2_input.txt") as f:
-    for line in f:
-        inp = line.strip().split("\t")
-        inp = [int(x) for x in inp]
+def get_input(file_path: str) -> list:
+    """Get the input data"""
+    inp = []
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            inp.append(list(map(int, line.strip().split("\t"))))
 
-        # Part 1
-        checksum += max(inp) - min(inp)
+    return inp
 
-        # Part 2
-        # Sort first so the big number is divided by the small number
-        inp.sort(reverse=True)
-        for idx, i in enumerate(inp):
-            for j in inp[idx+1:]:
+
+@profiler
+def part_1(lst: list) -> int:
+    """Find the difference between the biggest and smallest number in a list"""
+    return sum([max(x) - min(x) for x in lst])
+
+
+@profiler
+def part_2(lst: list) -> int:
+    """Sort first so the big number is divided by the small number"""
+    n = 0
+    for sublst in lst:
+        sublst.sort(reverse=True)
+        for idx, i in enumerate(sublst):
+            for j in sublst[idx+1:]:
                 if (i / j).is_integer():
-                    res += i/j
+                    n += i / j
 
-print("Part 1:", checksum)
-print("Part 2:", res)
+    return int(n)
+
+
+if __name__ == "__main__":
+    input_data = get_input("inputs/2_input.txt")
+
+    print(f"Part 1: {part_1(input_data)}")
+    print(f"Part 2: {part_2(input_data)}")

@@ -1,29 +1,57 @@
-# Part 1: Find all valid triangles, where the two smallest sides must be bigger than the largest side
-# Answer: 917
+# pylint: disable=line-too-long
+"""
+Part 1: Find all valid triangles, where the two smallest sides must be bigger than the largest side
+Answer: 917
 
-# Part 2: Look at the first column of the input and determine the same thing from there
-# Answer: 1649
+Part 2: Look at the first column of the input and determine the same thing from there
+Answer: 1649
+"""
 
-n, n2 = 0, 0
-ll, la = list(), list()
-with open("inputs/3_input.txt") as f:
-    for line in f:
-        line = list(map(int, line.split()))
-        ll.append(line[::])
+from copy import deepcopy
+from utils import profiler
 
-        # Part 1
+
+def get_input(file_path: str) -> list:
+    """Get the input data"""
+    lst = []
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            lst.append(list(map(int, line.split())))
+
+    return lst
+
+
+@profiler
+def part_1(lst: list) -> int:
+    """Sort the list to find the smallest sides"""
+    n = 0
+    for line in lst:
         line.sort()
         if line[0] + line[1] > line[2]:
             n += 1
 
-# Part 2
-for i in range (len(ll) // 3):
-    for j in range(3):
-        # Determine the vertical values from the first column
-        ln = [ll[i*3][j], ll[i*3+1][j], ll[i*3+2][j]]
-        ln.sort()
-        if ln[0]+ln[1] > ln[2]:
-            n2 += 1
+    return n
 
-print("Part 1:", n)
-print("Part 2:", n2)
+
+@profiler
+def part_2(lst: list) -> int:
+    """Take 3 sublists and compare the indices of these sublists to form a triangle"""
+    n = 0
+    print(lst)
+    for i in range(len(lst) // 3):
+        for j in range(3):
+            # Determine the vertical values from the column
+            ln = [lst[i * 3][j], lst[i * 3 + 1][j], lst[i * 3 + 2][j]]
+            ln.sort()
+            if ln[0] + ln[1] > ln[2]:
+                n += 1
+
+    return n
+
+
+if __name__ == "__main__":
+    input_data = get_input("inputs/3_input.txt")
+    input_data_cpy = deepcopy(input_data)
+
+    print(f"Part 1: {part_1(input_data)}")
+    print(f"Part 2: {part_2(input_data_cpy)}")

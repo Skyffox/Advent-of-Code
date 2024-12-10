@@ -1,5 +1,5 @@
 # Part 1: 
-# Answer: 
+# Answer: 3790645
 
 # Part 2: 
 # Answer: 

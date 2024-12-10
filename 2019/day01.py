@@ -1,29 +1,52 @@
-# Part 1: Find the fuel required for each module
-# Answer: 3296269
+# pylint: disable=line-too-long
+"""
+Part 1: Find the fuel required for each module
+Answer: 3296269
 
-# Part 2: The extra fuel we take with us makes extra mass which needs extra fuel etc...
-# Answer: 4941547
+Part 2: The extra fuel we take with us makes extra mass which needs extra fuel etc...
+Answer: 4941547
+"""
 
-# Calculate the fuel needed based on the amount of mass
+from utils import profiler
+
+
+def get_input(file_path: str) -> list:
+    """Get the input data"""
+    mass = []
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            mass.append(int(line.strip()))
+
+    return mass
+
+
 def fuel_calc(m):
+    """Calculate the new amount of mass after adding fuel"""
     return m // 3 - 2
 
-n, n2 = 0, 0
-with open("inputs/1_input.txt") as f:
-    for line in f:
-        # Part 1
-        mass = int(line.strip())
 
-        # Fuel required equals: mass // 3 - 2
-        n += fuel_calc(mass)
+@profiler
+def part_1(mass: list) -> int:
+    """Calculate the fuel needed for all modules"""
+    return sum([fuel_calc(m) for m in mass])
 
-        # Part 2
+
+@profiler
+def part_2(mass: list) -> int:
+    """If we get more fuel that adds more weight thus needing more fuel"""
+    n = 0
+    for m in mass:
         while True:
-            mass = fuel_calc(mass)
-            if mass <= 0:
+            m = fuel_calc(m)
+            if m <= 0:
                 break
-            n2 += mass
+            n += m
+
+    return n
 
 
-print("Part 1:", n)
-print("Part 2:", n2)
+if __name__ == "__main__":
+    input_data = get_input("inputs/1_input.txt")
+
+    print(f"Part 1: {part_1(input_data)}")
+    print(f"Part 2: {part_2(input_data)}")

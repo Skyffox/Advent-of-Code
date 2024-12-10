@@ -1,26 +1,40 @@
-# Part 1: Calculate a real number from the most common/uncommon bits that form a binary number
-# Answer: 852500
+# pylint: disable=line-too-long
+"""
+Part 1: Calculate a real number from the most common/uncommon bits that form a binary number
+Answer: 852500
 
-# Part 2: 
-# Answer: 1007985
+Part 2: What is the similarity score between the two lists?
+Answer: 1007985
+"""
+
+from utils import profiler
 
 
-def most_common_bit(lst, idx):
+def most_common_bit(lst: list, idx: int) -> int:
+    """a"""
     transposed = list(map(list, zip(*lst)))
-    return 1 if transposed[idx].count(1) >= transposed[idx].count(0) else 0
+    return transposed[idx].count(1) >= transposed[idx].count(0)
 
 
-lst, binary_lst = [], []
-gamma_rate, epsilon_rate = 0, 0
-with open("inputs/3_input.txt") as f:
-    for line in f:
-        lst.append(list(map(int, list(line.strip()))))
+def get_input(file_path: str) -> list:
+    """Get the input data"""
+    lst = []
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            lst.append(list(map(int, list(line.strip()))))
 
-    # Part 1
+    return lst
+
+
+@profiler
+def part_1(lst: list) -> int:
+    """a"""
+    gamma_rate, epsilon_rate = 0, 0
+
     # The gamma rate is the number that is most common in each position the epsilon rate the one that is most uncommon
     # so we transpose the original list so we can easily compare for each position
     transposed = list(map(list, zip(*lst)))
-    binary_lst = [1 if bit.count(1) > bit.count(0) else 0 for bit in transposed]
+    binary_lst = [bit.count(1) > bit.count(0) for bit in transposed]
 
     # Convert the rates, which was in binary, to a real number. For each 1 we find we add to the gamma rate
     # For the epsilon rate the zeroes are actually ones (since those are the most uncommon in that case)
@@ -30,9 +44,12 @@ with open("inputs/3_input.txt") as f:
         else:
             epsilon_rate += 2**idx
 
-    # Part 2
-    # So its a bit complicated what we are going to do, but... We are going to find the most common bit in 
-    # each position and then drop lists which do not have the most common bit in that position
+    return gamma_rate * epsilon_rate
+
+
+@profiler
+def part_2(lst: list) -> int:
+    """a"""
     oxygen_generator, co2_scrubber = lst[::], lst[::]
     i = 0
     while len(oxygen_generator) != 1:
@@ -50,6 +67,11 @@ with open("inputs/3_input.txt") as f:
     oxygen_real = sum([2**idx if b == 1 else 0 for idx, b in enumerate(oxygen_generator[0][::-1])])
     co2_real = sum([2**idx if b == 1 else 0 for idx, b in enumerate(co2_scrubber[0][::-1])])
 
+    return oxygen_real * co2_real
 
-print("Part 1", gamma_rate * epsilon_rate)
-print("Part 1", oxygen_real * co2_real)
+
+if __name__ == "__main__":
+    input_data = get_input("inputs/3_input.txt")
+
+    print(f"Part 1: {part_1(input_data)}")
+    print(f"Part 2: {part_2(input_data)}")
