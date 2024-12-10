@@ -1,2 +1,8 @@
+# Do not include inputs
+inputs/
 
-*.txt
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Editors
+.vscode/
