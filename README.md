@@ -1,12 +1,12 @@
 # Advent-of-Code
-Python solutions to the Advent of Code problems. Check out https://adventofcode.com.
+Python solutions to the [Advent of Code](https://adventofcode.com/) problems.
 
 The goal is to keep my programming knowledge fresh.
 
 I try not to use any libraries to make things short or predefined algorithms and just stick to what native Python provides. 
 
-# Stars Achieved
-
+## Stars Achieved
+```
      01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
 2015 ** ** **
 2016 ** ** **
@@ -18,3 +18,4 @@ I try not to use any libraries to make things short or predefined algorithms and
 2022 ** ** ** ** ** ** *  ** *  ** *        ** ** ** 
 2023 ** ** ** ** ** ** ** ** ** **
 2024 ** ** ** ** ** ** ** ** ** **
+```
