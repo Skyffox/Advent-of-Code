@@ -29,13 +29,13 @@ def get_input(file_path: str) -> list:
 
 @profiler
 def part_1(reports: list) -> int:
-    """Check which reports are deemed safe (are in order)"""
+    """Check which reports are deemed safe"""
     return sum([check_safe(report) for report in reports])
 
 
 @profiler
 def part_2(reports: list) -> int:
-    """Same as part_1() but we may remove a single entry to get a safe report"""
+    """Same as part_1() but we may remove a single entry from the list to get a safe report"""
     safe_reports = 0
     for report in reports:
         if check_safe(report):

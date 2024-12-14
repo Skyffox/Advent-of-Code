@@ -4,10 +4,9 @@ Part 1: Find out how many distinct tiles the guard visits
 Answer: 5030
 
 Part 2: If we could place an obstacle in any position in the grid how many times would we cause an infinite loop
-Answer: 1928 (takes ~56 seconds)
+Answer: 1928 (takes ~16 seconds)
 """
 
-from copy import deepcopy
 from utils import profiler
 
 
@@ -86,14 +85,16 @@ def part_2(grid: list, start_pos: tuple[int, int]) -> int:
     # We don't have to test every empty space, just the visited ones
     # because the obstruction must be on the visited path
     for x, y in visited:
-        grid_cpy = deepcopy(grid)
         # Add an obstacle
-        grid_cpy[y][x] = "#"
+        grid[y][x] = "#"
 
-        has_left, _ = patrol(grid_cpy, start_pos)
+        has_left, _ = patrol(grid, start_pos)
         # Means we ended up in a loop
         if not has_left:
             loops_count += 1
+
+        # Remove the obstacle again
+        grid[y][x] = "."
 
     return loops_count
 

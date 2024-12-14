@@ -33,6 +33,5 @@ if __name__ == "__main__":
     # Get input data
     input_data = get_input("inputs/XX_input.txt")
 
-    # Get solutions
-    print(f"Part 1 = {part_one(input_data)}")
-    print(f"Part 2 = {part_two(input_data)}")
+    print(f"Part 1: {part_one(input_data)}")
+    print(f"Part 2: {part_two(input_data)}")

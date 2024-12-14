@@ -1,6 +1,6 @@
 # pylint: disable=line-too-long
 """
-Part 1: What is the total distance between the two input lists, when they've been sorted?
+Part 1: Your actual left and right lists contain many location IDs. What is the total distance between your lists?
 Answer: 2031679
 
 Part 2: What is the similarity score between the two lists?
@@ -12,30 +12,30 @@ from utils import profiler
 
 def get_input(file_path: str) -> tuple[list, list]:
     """Get the input data"""
-    lst1, lst2 = [], []
+    left_lst, right_lst = [], []
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
             line = line.strip().split(" ")
-            lst1.append(int(line[0]))
-            lst2.append(int(line[-1]))
+            left_lst.append(int(line[0]))
+            right_lst.append(int(line[-1]))
 
-    return lst1, lst2
+    return left_lst, right_lst
 
 
 @profiler
-def part_1(lst1: list, lst2: list) -> int:
+def part_1(left_lst: list, right_lst: list) -> int:
     """Calculate the pairwise difference between the two lists"""
-    return sum([abs(l - r) for l, r in zip(sorted(lst1), sorted(lst2))])
+    return sum([abs(l - r) for l, r in zip(sorted(left_lst), sorted(right_lst))])
 
 
 @profiler
-def part_2(lst1: list, lst2: list) -> int:
-    """Calculate the similarity score, if it occurs in the right list then count it's appearances times the actual number"""
-    return sum([i * lst2.count(i) for i in lst1])
+def part_2(left_lst: list, right_lst: list) -> int:
+    """Calculate the similarity score"""
+    return sum([i * right_lst.count(i) for i in left_lst])
 
 
 if __name__ == "__main__":
-    left_lst, right_lst = get_input("inputs/1_input.txt")
+    left_input, right_input = get_input("inputs/1_input.txt")
 
-    print(f"Part 1: {part_1(left_lst, right_lst)}")
-    print(f"Part 2: {part_2(left_lst, right_lst)}")
+    print(f"Part 1: {part_1(left_input, right_input)}")
+    print(f"Part 2: {part_2(left_input, right_input)}")
