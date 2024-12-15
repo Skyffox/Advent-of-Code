@@ -16,8 +16,16 @@ def get_input(file_path: str) -> list:
         return list(map(int, file.readlines()[0].split(" ")))
 
 
-def blink(my_dict):
-    """Aaa"""
+def blink(my_dict: dict) -> dict:
+    """
+    Simulate a single blink for a dictionary of stones. There are 3 rules for a stone during a blink:
+    If the current value is 0 it becomes 1
+    If the length of the current value is divisible by 2, then 2 new stones will have the value of either side of the current value
+    Otherwise the new value is the current value times 2024
+
+    The result is added to a new dictionary because we are interested in the amount of stones, 
+    but not in actually computing the result for all of these
+    """
     new_dict = {}
     for key, val in my_dict.items():
         if key == 0:
@@ -36,15 +44,19 @@ def blink(my_dict):
 
 
 @profiler
-def part_one(data_input, nr_blinks):
-    """Comment"""
+def compute(data_input: list, nr_blinks: int) -> int:
+    """
+    Perform an amount of blinks for each number in the input
+    We can iterate over the input since the result of a blink for a stone is 
+    independant of the result of the other stones
+    """
     n = 0
     for num in data_input:
-        d = {num : 1}
+        stones = {num : 1}
         for _ in range(nr_blinks):
-            d = blink(d)
+            stones = blink(stones)
 
-        n += sum([x[1] for x in d.items()]) # TODO: change to .values()
+        n += sum([x for x in stones.values()])
 
     return n
 
@@ -53,5 +65,5 @@ if __name__ == "__main__":
     # Get input data
     input_data = get_input("inputs/11_input.txt")
 
-    print(f"Part 1: {part_one(input_data, 25)}")
-    print(f"Part 2: {part_one(input_data, 75)}")
+    print(f"Part 1: {compute(input_data, 25)}")
+    print(f"Part 2: {compute(input_data, 75)}")

@@ -1,10 +1,10 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Part 1: What is the total price of fencing all regions on your map?
+Answer: 1400386
 
-Part 2: 
-Answer: 
+Part 2: What is the new total price of fencing all regions on your map?
+Answer: 851994
 """
 
 from utils import profiler
@@ -15,195 +15,178 @@ def get_input(file_path: str) -> list:
     lst = []
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
-            lst.append([ch for ch in line.strip()])
+            lst.append(list(line.strip()))
 
     return lst
 
 
-# Function to check if a cell is within bounds of the grid
-def is_valid(x, y, grid, visited):
-    return 0 <= x < len(grid) and 0 <= y < len(grid[0]) and not visited[x][y]
+def is_valid(x: int, y: int, grid: list) -> bool:
+    """Check if a cell is within bounds of the grid"""
+    return 0 <= x < len(grid) and 0 <= y < len(grid[0])
 
 
-# DFS function to find connected letters that are the same
-def dfs(x, y, grid, visited, current_group, letter):
+def dfs(x: int, y: int, grid: list, visited: list, current_group: list) -> list:
+    """Depth-First Search function to find connected letters that are the same"""
     # Define the directions for traversal (right, left, down, up)
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    # Use pass by reference to know what positions we have visited
     visited[x][y] = True
-    current_group.append((x, y))  # Store the position (x, y)
-    
+    current_group.append((x, y))
+
     # Explore all 4 directions
     for dx, dy in directions:
         nx, ny = x + dx, y + dy
-        if is_valid(nx, ny, grid, visited) and grid[nx][ny] == letter:
-            dfs(nx, ny, grid, visited, current_group, letter)
+        # The letter we find needs to be in the grid, the same as our original letter and also a unique position
+        if is_valid(nx, ny, grid) and grid[nx][ny] == grid[x][y] and not visited[nx][ny]:
+            dfs(nx, ny, grid, visited, current_group)
 
 
-# Main function to find groups of the same letter
-def find_groups(grid):
-    rows = len(grid)
-    cols = len(grid[0])
-    visited = [[False for _ in range(cols)] for _ in range(rows)]
+def find_groups(grid: list) -> list:
+    """Find groups of the same letter"""
+    visited = [[False for _ in range(len(grid[0]))] for _ in range(len(grid))]
     groups = []
-    
-    for i in range(rows):
-        for j in range(cols):
+
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
             if not visited[i][j]:
                 current_group = []
-                letter = grid[i][j]
-                dfs(i, j, grid, visited, current_group, letter)
+                dfs(i, j, grid, visited, current_group)
                 if current_group:
                     groups.append(current_group)
-    
+
     return groups
 
 
-def find_consecutive_positions(positions):
+def find_consecutive_positions(positions: list, check_vertical=False) -> list:
+    """a"""
     # Sort the positions first by x-coordinate (row) and then by y-coordinate (column)
     sorted_positions = sorted(positions)
-    
-    horizontal_groups = []
-    vertical_groups = []
-    
+    x, y = 0, 1
+
+    if check_vertical:
+        # Find vertical sequences (same column, consecutive rows)
+        sorted_positions = sorted(positions, key=lambda x: (x[1], x[0]))
+        x, y = y, x
+
+    groups = []
+
     # Find horizontal sequences (same row, consecutive columns)
     current_group = []
-    for i in range(len(sorted_positions)):
+    for idx, pos in enumerate(sorted_positions):
         if not current_group:
-            current_group.append(sorted_positions[i])
+            current_group.append(pos)
         else:
-            if sorted_positions[i][0] == sorted_positions[i-1][0] and sorted_positions[i][1] == sorted_positions[i-1][1] + 1:
-                current_group.append(sorted_positions[i])
+            if pos[x] == sorted_positions[idx-1][x] and pos[y] == sorted_positions[idx-1][y] + 1:
+                current_group.append(pos)
             else:
                 if len(current_group) > 1:
-                    horizontal_groups.append(current_group)
-                current_group = [sorted_positions[i]]
-    if len(current_group) > 1:
-        horizontal_groups.append(current_group)
+                    groups.append(current_group)
+                current_group = [pos]
 
-    # Find vertical sequences (same column, consecutive rows)
-    sorted_by_column = sorted(positions, key=lambda x: (x[1], x[0]))  # Sort by column (y), then by row (x)
-    
-    current_group = []
-    for i in range(len(sorted_by_column)):
-        if not current_group:
-            current_group.append(sorted_by_column[i])
-        else:
-            if sorted_by_column[i][1] == sorted_by_column[i-1][1] and sorted_by_column[i][0] == sorted_by_column[i-1][0] + 1:
-                current_group.append(sorted_by_column[i])
-            else:
-                if len(current_group) > 1:
-                    vertical_groups.append(current_group)
-                current_group = [sorted_by_column[i]]
     if len(current_group) > 1:
-        vertical_groups.append(current_group)
-    
-    return horizontal_groups, vertical_groups
+        groups.append(current_group)
+
+    return groups
 
 
 @profiler
-def part_one(grid):
-    """Comment"""
-    # Call the function to find groups
+def part_one(grid: list) -> int:
+    """Find the parameter of all the groups in the grid, so the elves know how much metres of fence to buy"""
     groups = find_groups(grid)
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-    # find the perimeter for each group
-    perimeter, p2 = 0, 0
+    perimeter = 0
     for group in groups:
-        total_sides = 0
-
-        # visited_fences = []
         if len(group) == 1:
             p = 4
-            total_sides = 4
         else:
-            # perimeter = area * # of fences
+            # Maximum perimeter for a group is the amount of tiles in the group times 4 (one for each side)
             p = len(group) * 4
 
-            for pos in group:
-                x, y = pos
-                # add fences in all directions
-                # visited_fences.extend([(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)])
-
-                # Now find all the overlap between the positions because we dont need fences between the same
-                # Explore all 4 directions
+            for x, y in group:
+                # Now find all the overlap between the tiles because we don't need fences between members from the same group
                 for dx, dy in directions:
                     nx, ny = x + dx, y + dy
                     if (nx, ny) in group:
                         p -= 1
-                        # visited_fences.remove((nx, ny))
 
-            # PART 2
-            # we first get the horizontal and vertical groups within our group, then we see whether a side on this horizotna/vertical group is ondoorbroken
-            # dan kunnen we het tellen als een "side" 
-            horizontal, vertical = find_consecutive_positions(group)
+        perimeter += len(group) * p
+
+    return perimeter
+
+
+@profiler
+def part_two(grid: list) -> int:
+    """Instead of counting tiles we now need to count the unique amount of sides for an area"""
+    groups = find_groups(grid)
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    perimeter = 0
+    for group in groups:
+        total_sides = 0
+
+        if len(group) == 1:
+            total_sides = 4
+        else:
+            # First find all the horizontal and vertical groups within our area, then we will iterate over these groups
+            horizontal = find_consecutive_positions(group)
+            vertical = find_consecutive_positions(group, True)
             total_visited_fences = []
+
             for row in horizontal:
                 visited_fences = []
 
-                for pos in row:
-                    y, x = pos
+                for y, x in row:
                     number = grid[y][x]
                     for dx, dy in directions:
                         nx, ny = x + dx, y + dy
-                        b = 0 <= nx < len(grid) and 0 <= ny < len(grid[0])
-                        if (b and grid[ny][nx] != number) or not b:
+                        valid = is_valid(nx, ny, grid)
+                        # Add a fence when our number from the current position is different from our original
+                        # We may play fences outside the grid because we place them in positions around the current position
+                        if (valid and grid[ny][nx] != number) or not valid:
                             visited_fences.append((ny, nx))
 
-                hori, _ = find_consecutive_positions(visited_fences)
-                flatten_hori = [x for xs in hori for x in xs]
-                # total is the amount of side we have we have found in the last find consecutive positins plus the side that where found in visited fences but not part of a side
-                # empty_pos = sum([1 for x in visited_fences if x not in flatten_hori])
-                total_sides += len(hori)# + empty_pos
-                # print(visited_fences, hori, len(hori), empty_pos)
-                total_visited_fences.extend(flatten_hori)
-
-            # print(total_visited_fences)
-            # print(total_sides)
+                # Now we have all fences for a particular group, but we still need to know how many of these fences form a side
+                horizontal_sides = find_consecutive_positions(visited_fences)
+                total_sides += len(horizontal_sides)
+                # Add all these positions to the visited list, since they now have a fence
+                total_visited_fences.extend([x for xs in horizontal_sides for x in xs])
 
             for col in vertical:
                 visited_fences = []
 
-                for pos in col:
-                    y, x = pos
+                for y, x in col:
                     number = grid[y][x]
                     for dx, dy in directions:
                         nx, ny = x + dx, y + dy
-                        b = 0 <= nx < len(grid) and 0 <= ny < len(grid[0])
-                        if (b and grid[ny][nx] != number) or not b:
+                        valid = is_valid(nx, ny, grid)
+                        # Add a fence when our number from the current position is different from our original
+                        # We may play fences outside the grid because we place them in positions around the current position
+                        if (valid and grid[ny][nx] != number) or not valid:
                             visited_fences.append((ny, nx))
 
-                _, verti = find_consecutive_positions(visited_fences)
-                flatten_verti = [x for xs in verti for x in xs]
-                # total is the amount of side we have we have found in the last find consecutive positins plus the side that where found in visited fences but not part of a side
-                # empty_pos = sum([1 for x in visited_fences if x not in flatten_verti])
-                total_sides += len(verti)# + empty_pos
-                total_visited_fences.extend(flatten_verti)
+                # Now we have all fences for a particular group, but we still need to know how many of these fences form a side
+                vertical_sides = find_consecutive_positions(visited_fences, True)
+                total_sides += len(vertical_sides)
+                # Add all these positions to the visited list, since they now have a fence
+                total_visited_fences.extend([x for xs in vertical_sides for x in xs])
 
-            # Now do a final big pass on all the positions that do not have a fence yet and aren't part of a side
-            for pos in group:
-                x, y = pos
-                number = grid[y][x]
+            # There are some positions that are not part of a side, here we will add the fences for these positions
+            for x, y in group:
                 for dx, dy in directions:
                     nx, ny = x + dx, y + dy
+                    # We have a fence for this position already
                     if (nx, ny) in total_visited_fences:
                         total_visited_fences.remove((nx, ny))
                     else:
                         if (nx, ny) not in group:
                             total_sides += 1
 
+        # The perimeter is the surface area of the group times the amount of sides that require a fence
+        perimeter += len(group) * total_sides
 
-        perimeter += len(group) * p
-        p2 += len(group) * total_sides
-
-    print("part1,", perimeter)
-    print("part2,", p2)
-
-
-
-@profiler
-def part_two(grid):
-    """Comment"""
+    return perimeter
 
 
 if __name__ == "__main__":
