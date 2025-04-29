@@ -1,111 +1,95 @@
-# Part 1: How many trees are visible from outside the grid?
-# Answer: 1533
+# pylint: disable=line-too-long
+"""
+Part 1: How many trees are visible from outside the grid?
+Answer: 1533
 
-# Part 2: What is the highest scenic score possible for any tree?
-# Answer: 345744
+Part 2: What is the highest scenic score possible for any tree?
+Answer: 345744
+"""
 
-forest = []
-with open("inputs/8_input.txt") as f:
-    for line in f:
-        line = line.strip()
-        line = [int(x) for x in str(line)]
-        forest.append(line)
+from utils import profiler
 
-visible_trees = len(forest) * 2 + len(forest[0]) * 2 - 4
-scenic_score = 0
 
-# Part 1
-for y in range(1, len(forest) - 1):
-    for x in range(1, len(forest) - 1):
+def get_input(file_path: str) -> list:
+    """Get the input data"""
+    with open(file_path, "r", encoding="utf-8") as file:
+        return [list(line.strip()) for line in file]
 
-        # left
-        b = True
-        for a in range(0, x):
-            if forest[y][x] <= forest[y][a]:
-                b = False
-                break
 
-        if b:
-            visible_trees += 1
-            continue
+@profiler
+def part_1(forrest: list) -> int:
+    """
+    Check for every position in the grid (a tree) whether all of the other trees between it and an edge of the grid are shorter than it. 
+    Then it is visible. This only has to be true for one side not all of them.
+    """
+    visible_trees = len(forrest) * 2 + len(forrest[0]) * 2 - 4
+    # Part 1
+    for y in range(1, len(forrest) - 1):
+        for x in range(1, len(forrest) - 1):
+            # Left
+            if all(forrest[y][x] > forrest[y][a] for a in range(x)):
+                visible_trees += 1
+                continue
 
-        # right
-        b = True
-        for a in range(x+1, len(forest[0])):
-            if forest[y][x] <= forest[y][a]:
-                b = False
-                break
+            # Right
+            if all(forrest[y][x] > forrest[y][a] for a in range(x + 1, len(forrest[0]))):
+                visible_trees += 1
+                continue
 
-        if b:
-            visible_trees += 1
-            continue
+            # Top
+            if all(forrest[y][x] > forrest[a][x] for a in range(y)):
+                visible_trees += 1
+                continue
 
-        # top
-        b = True
-        for a in range(0, y):
-            if forest[y][x] <= forest[a][x]:
-                b = False
-                break
+            # Bottom
+            if all(forrest[y][x] > forrest[a][x] for a in range(y + 1, len(forrest))):
+                visible_trees += 1
+                continue
 
-        if b:
-            visible_trees += 1
-            continue
+    return visible_trees
 
-        # bottom
-        b = True
-        for a in range(y+1, len(forest)):
-            if forest[y][x] <= forest[a][x]:
-                b = False
-                break
 
-        if b:
-            visible_trees += 1
-            continue
-
-print("Number of trees viewable from the edge:", visible_trees)
-
-# Part 2
-for y in range(1, len(forest) - 1):
-    for x in range(1, len(forest) - 1):
-
-        # left
-        score_left = 0
-        for a in range(x-1, -1, -1):
-            if forest[y][x] > forest[y][a]:
+@profiler
+def part_2(forrest: list) -> int:
+    """The elves want to build a treehouse and we need to calculate from what position we can see the most trees"""
+    scenic_score = 0
+    for y in range(1, len(forrest) - 1):
+        for x in range(1, len(forrest) - 1):
+            # Left
+            score_left = 0
+            for a in range(x-1, -1, -1):
                 score_left += 1
-            elif forest[y][x] <= forest[y][a]:
-                score_left +=1
-                break
+                if forrest[y][x] <= forrest[y][a]:
+                    break
 
-        # right
-        score_right = 0
-        for a in range(x+1, len(forest[0])):
-            if forest[y][x] > forest[y][a]:
+            # Right
+            score_right = 0
+            for a in range(x+1, len(forrest[0])):
                 score_right += 1
-            elif forest[y][x] <= forest[y][a]:
-                score_right +=1
-                break
+                if forrest[y][x] <= forrest[y][a]:
+                    break
 
-        # top
-        score_top = 0
-        for a in range(y-1, -1, -1):
-            if forest[y][x] > forest[a][x]:
+            # Top
+            score_top = 0
+            for a in range(y-1, -1, -1):
                 score_top += 1
-            elif forest[y][x] <= forest[a][x]:
-                score_top +=1
-                break
+                if forrest[y][x] <= forrest[a][x]:
+                    break
 
-        # bottom
-        score_bottom = 0
-        for a in range(y+1, len(forest)):
-            if forest[y][x] > forest[a][x]:
+            # Bottom
+            score_bottom = 0
+            for a in range(y+1, len(forrest)):
                 score_bottom += 1
-            elif forest[y][x] <= forest[a][x]:
-                score_bottom +=1
-                break
+                if forrest[y][x] <= forrest[a][x]:
+                    break
 
-        local_score = score_left * score_right * score_top * score_bottom
-        if local_score > scenic_score:
-            scenic_score = local_score
+            scenic_score = max(scenic_score, score_left * score_right * score_top * score_bottom)
 
-print("Highest scenic score:", scenic_score)
+    return scenic_score
+
+
+if __name__ == "__main__":
+    input_data = get_input("inputs/8_input.txt")
+
+    print(f"Part 1: {part_1(input_data)}")
+    print(f"Part 2: {part_2(input_data)}")

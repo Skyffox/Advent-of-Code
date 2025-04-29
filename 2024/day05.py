@@ -7,11 +7,10 @@ Part 2: Fix the incorrectly ordered updates by applying the ordering rules
 Answer: 5017
 """
 
-from typing import Tuple
 from utils import profiler
 
 
-def get_input(file_path: str) -> Tuple[list, list]:
+def get_input(file_path: str) -> tuple[list, list]:
     """Get the input data"""
     pages, rules = [], []
     with open(file_path, "r", encoding="utf-8") as file:

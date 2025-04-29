@@ -12,12 +12,8 @@ from utils import profiler
 
 def get_input(file_path: str) -> tuple[list, list]:
     """Get the input data"""
-    lst = []
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            lst.append(int(line.strip()))
-
-    return lst
+        return [int(line.strip()) for line in file]
 
 
 @profiler

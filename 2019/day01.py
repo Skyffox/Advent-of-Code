@@ -12,12 +12,8 @@ from utils import profiler
 
 def get_input(file_path: str) -> list:
     """Get the input data"""
-    mass = []
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            mass.append(int(line.strip()))
-
-    return mass
+        return [int(line.strip()) for line in file]
 
 
 def fuel_calc(m):

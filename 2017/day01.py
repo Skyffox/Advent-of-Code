@@ -1,6 +1,6 @@
 # pylint: disable=line-too-long
 """
-Part 1: Find the sum of all digits that match the next digit in the list and the list is circular
+Part 1: Find the sum of all digits that match the next digit in the list and the list must be circular
 Answer: 1253
 
 Part 2: Do the same but now check not the next digit but the digit halfway further up the list
@@ -12,20 +12,14 @@ from utils import profiler
 
 def get_input(file_path: str) -> list:
     """Get the input data"""
-    lst = []
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
-            lst = list(map(int, line.strip()))
-
-    return lst
+            return list(map(int, line.strip()))
 
 
 @profiler
 def part_1(lst: list) -> int:
-    """
-    Check an item in the list against the next one, 
-    this does not check the circular requirement that is why the second part is added
-    """
+    """Check an item in the list against the next one, the second part is to satisfy the circular requirement"""
     return sum([i for i, j in zip(lst, lst[1:]) if i == j]) + int(lst[0] == lst[-1])
 
 

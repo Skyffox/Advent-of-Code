@@ -29,7 +29,7 @@ def get_input(file_path: str) -> list:
 
 @profiler
 def part_1(lst: list) -> int:
-    """a"""
+    """Check how many passwords are correct according to their policies"""
     n = 0
     for line in lst:
         rule, lower_b, upper_b, pw = line
@@ -41,11 +41,13 @@ def part_1(lst: list) -> int:
 
 @profiler
 def part_2(lst: list) -> int:
-    """a"""
+    """
+    Check if password is correct, the lowerbound and upperbound now represent an index
+    in the password and one of them must contain the policy (not both).
+    """
     n = 0
     for line in lst:
         rule, lower_b, upper_b, pw = line
-        # bla
         if (pw[lower_b - 1] == rule[1] and pw[lower_b - 1] != pw[upper_b - 1]) or \
            (pw[upper_b - 1] == rule[1] and pw[lower_b - 1] != pw[upper_b - 1]):
             n += 1

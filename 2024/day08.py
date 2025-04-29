@@ -18,12 +18,8 @@ def within_grid(x: int, y: int, x_limit: int, y_limit: int) -> bool:
 
 def get_input(file_path: str) -> list:
     """Get the input data"""
-    grid = []
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            grid.append(list(line.strip()))
-
-    return grid
+        return [list(line.strip()) for line in file]
 
 
 def find_antennas(grid: list) -> dict:

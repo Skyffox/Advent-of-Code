@@ -25,7 +25,7 @@ def get_input(file_path: str) -> tuple[list, list]:
 
 @profiler
 def part_1(lst: list) -> int:
-    """a"""
+    """Follow commands to change the position of the submarine"""
     x, y = 0, 0
     for (move, units) in lst:
         if move[0] == "forward":
@@ -35,12 +35,13 @@ def part_1(lst: list) -> int:
         elif move[0] == "up":
             y -= units
 
+    # Multiply the horizontal position by depth
     return x * y
 
 
 @profiler
 def part_2(lst: list) -> int:
-    """a"""
+    """There is a new element (the aim) that changes based on the instructions"""
     position, depth, aim = 0, 0, 0
     for (move, units) in lst:
         if move[0] == "forward":
@@ -51,6 +52,7 @@ def part_2(lst: list) -> int:
         elif move[0] == "up":
             aim -= units
 
+    # Multiply the horizontal position by depth
     return position * depth
 
 

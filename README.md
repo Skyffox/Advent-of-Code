@@ -1,7 +1,7 @@
 # Advent-of-Code
 Python solutions to the [Advent of Code](https://adventofcode.com/) problems.
 
-The goal is to keep my programming knowledge fresh.
+The goal is to keep my programming knowledge fresh. I love how most of the AoC problems can be solved with basic problem solving and can be further optimized by thinking of effective data structures and sometimes memoization
 
 I try not to use any libraries to make things short or predefined algorithms and just stick to what native Python provides. 
 
@@ -15,7 +15,7 @@ I try not to use any libraries to make things short or predefined algorithms and
 2019 ** ** **
 2020 ** ** **
 2021 ** ** ** 
-2022 ** ** ** ** ** ** *  ** *  ** *        ** ** ** 
-2023 ** ** ** ** ** ** ** ** ** **
-2024 ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
+2022 ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
+2023 ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
+2024 ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
 ```

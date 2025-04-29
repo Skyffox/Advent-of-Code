@@ -1,11 +1,75 @@
-# Part 1: Work out the steps to release the most pressure in 30 minutes. What is the most pressure you can release?
-# Answer: 1915 
+# pylint: disable=line-too-long
+"""
+Part 1: Work out the steps to release the most pressure in 30 minutes. What is the most pressure you can release?
+Answer: 1915
 
-# Part 2: With you and an elephant working together for 26 minutes, what is the most pressure you could release?
-# Answer: 2772
+Part 2: With you and an elephant working together for 26 minutes, what is the most pressure you could release?
+Answer: 2772
+"""
 
-def solve2(flow, tunnels):
+from utils import profiler
 
+
+def get_input(file_path: str) -> list:
+    """Get the input data"""
+    flow_rates, options = dict(), dict()
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip().split(" ")
+            valve = line[1]
+            flow = int(line[4].split("=")[1].split(";")[0])
+            tunnels = line[9:]
+            tunnels = [x.split(",")[0] for x in tunnels]
+
+            flow_rates[valve] = flow
+            options[valve] = tunnels
+
+    return flow_rates, options
+
+
+@profiler
+def part_1(flow: dict, tunnels: dict) -> int:
+    """a"""
+    states = [(1, "AA", 0, ("zzz",))]
+    seen = {}
+    best = 0
+
+    while len(states) > 0:
+
+        current = states.pop()
+        time, where, score, opened_s = current
+        opened = {x for x in opened_s}
+
+        if seen.get((time, where), -1) >= score:
+            continue
+        seen[(time, where)] = score
+
+        if time == 30:
+            best = max(best, score)
+            continue
+
+        # if we open the valve here
+        if flow[where] > 0 and where not in opened:
+
+            opened.add(where)
+            new_score = score + sum(flow.get(where, 0) for where in opened)
+            new_state = (time + 1, where, new_score, tuple(opened))
+
+            states.append(new_state)
+            opened.discard(where)
+
+        # if we don't open a valve here
+        new_score = score + sum(flow.get(where, 0) for where in opened)
+        for option in tunnels[where]:
+            new_state = (time + 1, option, new_score, tuple(opened))
+            states.append(new_state)
+
+    return best
+
+
+@profiler
+def part_2(flow: dict, tunnels: dict) -> int:
+    """aa"""
     states = [(1, "AA", "AA", 0, ("zzz",))]
     seen = {}
     best = 0
@@ -85,59 +149,8 @@ def solve2(flow, tunnels):
     return best
 
 
-def solve(flow, tunnels):
+if __name__ == "__main__":
+    flow_rates_input, options_input = get_input("inputs/16_input.txt")
 
-    states = [(1, "AA", 0, ("zzz",))]
-    seen = {}
-    best = 0
-
-    while len(states) > 0:
-
-        current = states.pop()
-        time, where, score, opened_s = current
-        opened = {x for x in opened_s}
-
-        if seen.get((time, where), -1) >= score:
-            continue
-        seen[(time, where)] = score
-
-        if time == 30:
-            best = max(best, score)
-            continue
-
-        # if we open the valve here
-        if flow[where] > 0 and where not in opened:
-
-            opened.add(where)
-            new_score = score + sum(flow.get(where, 0) for where in opened)
-            new_state = (time + 1, where, new_score, tuple(opened))
-
-            states.append(new_state)
-            opened.discard(where)
-
-        # if we don't open a valve here
-        new_score = score + sum(flow.get(where, 0) for where in opened)
-        for option in tunnels[where]:
-            new_state = (time + 1, option, new_score, tuple(opened))
-            states.append(new_state)
-
-    return best
-
-
-flow_rates = dict()
-options = dict()
-with open("inputs/16_input.txt") as f:
-    for line in f:
-        line = line.strip().split(" ")
-        valve = line[1]
-        flow = int(line[4].split("=")[1].split(";")[0])
-        tunnels = line[9:]
-        tunnels = [x.split(",")[0] for x in tunnels]
-        
-        flow_rates[valve] = flow
-        options[valve] = tunnels
-
-solution = solve(flow_rates, options)
-solution2 = solve2(flow_rates, options)
-print(solution)
-print(solution2) # correct solution is 2772
+    print(f"Part 1: {part_1(flow_rates_input, options_input)}")
+    print(f"Part 2: {part_2(flow_rates_input, options_input)}")

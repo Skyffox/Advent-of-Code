@@ -30,12 +30,8 @@ def search(grid: list, word: list, row: int, col: int, step_x: int, step_y: int)
 
 def get_input(file_path: str) -> list:
     """Get the input data"""
-    grid = []
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            grid.append(list(line.strip()))
-
-    return grid
+        return [list(line.strip()) for line in file]
 
 
 @profiler

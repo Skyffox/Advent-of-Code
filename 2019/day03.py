@@ -1,9 +1,9 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
+Part 1: What is the Manhattan distance from the central port to the closest intersection?
 Answer: 3247
 
-Part 2: 
+Part 2: What is the fewest combined steps the wires must take to reach an intersection?
 Answer: 48054
 """
 
@@ -24,11 +24,11 @@ def get_input(file_path: str) -> tuple[list, list]:
 
 
 def get_path(instructions):
-    """a"""
+    """Add the new position to the path"""
     x, y = 0, 0
     path = []
 
-    for direction, steps in instructions:       
+    for direction, steps in instructions:
         for _ in range(steps):
             if direction == 'U':
                 y += 1
@@ -46,7 +46,7 @@ def get_path(instructions):
 
 @profiler
 def part_1(wires: list) -> int:
-    """a"""
+    """Get all the intersections of the two wires, then calculate the distance to each intersection"""
     # Get the paths for both wires
     path1 = get_path(wires[0])
     path2 = get_path(wires[1])
@@ -61,7 +61,7 @@ def part_1(wires: list) -> int:
 
 @profiler
 def part_2(wires: list) -> int:
-    """a"""
+    """Get all the intersections of the two wires, then calculate the distance to the closest intersection"""
     # Get the paths for both wires
     path1 = get_path(wires[0])
     path2 = get_path(wires[1])

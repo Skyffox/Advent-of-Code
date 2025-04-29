@@ -1,6 +1,6 @@
 # pylint: disable=line-too-long
 """
-Part 1: Your actual left and right lists contain many location IDs. What is the total distance between your lists?
+Part 1: Two lists contain location IDs. What is the total distance between your lists?
 Answer: 2031679
 
 Part 2: What is the similarity score between the two lists?

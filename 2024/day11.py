@@ -19,9 +19,9 @@ def get_input(file_path: str) -> list:
 def blink(my_dict: dict) -> dict:
     """
     Simulate a single blink for a dictionary of stones. There are 3 rules for a stone during a blink:
-    If the current value is 0 it becomes 1
-    If the length of the current value is divisible by 2, then 2 new stones will have the value of either side of the current value
-    Otherwise the new value is the current value times 2024
+    - If the current value is 0 it becomes 1
+    - If the length of the current value is divisible by 2, then 2 new stones will have the value of either side of the current value
+    - Otherwise the new value is the current value times 2024
 
     The result is added to a new dictionary because we are interested in the amount of stones, 
     but not in actually computing the result for all of these
@@ -48,7 +48,7 @@ def compute(data_input: list, nr_blinks: int) -> int:
     """
     Perform an amount of blinks for each number in the input
     We can iterate over the input since the result of a blink for a stone is 
-    independant of the result of the other stones
+    independent of the result of the other stones
     """
     n = 0
     for num in data_input:
@@ -56,7 +56,7 @@ def compute(data_input: list, nr_blinks: int) -> int:
         for _ in range(nr_blinks):
             stones = blink(stones)
 
-        n += sum([x for x in stones.values()])
+        n += sum(list(stones.values()))
 
     return n
 

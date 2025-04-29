@@ -1,14 +1,27 @@
-# Part 1: Find the item type that appears in both compartments of each rucksack. What is the sum of the priorities of those item types?
-# Answer: 7845
+# pylint: disable=line-too-long
+"""
+Part 1: Find the item type that appears in both compartments of each rucksack. What is the sum of the priorities of those item types?
+Answer: 7845
 
-# Part 2: Find the item type that corresponds to the badges of each three-Elf group. What is the sum of the priorities of those item types?
-# Answer: 2790
+Part 2: Find the item type that corresponds to the badges of each three-Elf group. What is the sum of the priorities of those item types?
+Answer: 2790
+"""
 
-# Split the string in two and find similar items.
-def part1(lines):
+from utils import profiler
+
+
+def get_input(file_path: str) -> list:
+    """Get the input data"""
+    with open(file_path, "r", encoding="utf-8") as file:
+        return file.readlines()
+
+
+@profiler
+def part_1(lines: list) -> int:
+    """Split the string in two and find similar items."""
     s = 0
-    for i in range(0, len(lines)):
-        line = list(lines[i].strip())
+    for i, item in enumerate(lines):
+        line = list(item.strip())
         first_compartment = line[:len(line)//2]
         second_compartment = line[len(line)//2:]
 
@@ -26,8 +39,9 @@ def part1(lines):
     return s
 
 
-# Find similar items, 3 lines at a time.
-def part2(lines):
+@profiler
+def part_2(lines: list) -> int:
+    """Find similar items, 3 lines at a time."""
     s = 0
     for i in range(0, len(lines), 3):
         for item in lines[i]:
@@ -42,9 +56,8 @@ def part2(lines):
     return s
 
 
-with open("inputs/3_input.txt") as f:
-    s = 0
-    lines = f.readlines()
+if __name__ == "__main__":
+    input_data = get_input("inputs/3_input.txt")
 
-print("Sum  of priorities of common items:", part1(lines))      
-print("Sum of priorities of badge:", part2(lines))
+    print(f"Part 1: {part_1(input_data)}")
+    print(f"Part 2: {part_2(input_data)}")

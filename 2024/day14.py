@@ -12,7 +12,7 @@ from copy import deepcopy
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
+def get_input(file_path: str) -> tuple[list, list]:
     """Get the input data"""
     positions, velocities = [], []
     with open(file_path, "r", encoding="utf-8") as file:
@@ -40,7 +40,7 @@ def print_grid(positions: list, max_width: int, max_length: int) -> None:
 
 @profiler
 def part_one(positions: list, velocities: list) -> int:
-    """Comment"""
+    """Simulate the positions of all robots and afterwards count how many reside in each quadrant of the grid"""
     max_width = 101
     max_length = 103
     seconds = 100
@@ -87,10 +87,10 @@ def part_one(positions: list, velocities: list) -> int:
 
 @profiler
 def part_two(positions: list, velocities: list) -> int:
-    """Comment"""
+    """After a certain amount of seconds the robots form a christmas tree, here the answer is given for quick debug purposes"""
     max_width = 101
     max_length = 103
-    seconds = 6876
+    seconds = 6876 # This is the answer
 
     for _ in range(seconds):
         for idx, (p, v) in enumerate(zip(positions, velocities)):
@@ -107,11 +107,11 @@ def part_two(positions: list, velocities: list) -> int:
 
             positions[idx] = [x, y]
 
-        # Debug purposes, also zero-indexed
+        # Debug purposes, also the print is zero-indexed
         # if s == seconds - 1:
         #     print_grid(positions, max_width, max_length)
 
-    return 6876
+    return seconds
 
 
 if __name__ == "__main__":

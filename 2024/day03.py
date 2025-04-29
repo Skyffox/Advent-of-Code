@@ -13,12 +13,8 @@ from utils import profiler
 
 def get_input(file_path: str) -> str:
     """Get the input data"""
-    lst = []
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            lst.append(line.strip())
-
-    return "".join(lst)
+        return "".join([line.strip() for line in file])
 
 
 @profiler

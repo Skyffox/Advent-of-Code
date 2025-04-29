@@ -27,9 +27,9 @@ def get_input(file_path: str) -> tuple[list, list, list]:
 def part_1(width: list, length: list, height: list) -> int:
     """Find the surface area for the amount of wrapping paper we need"""
     total = 0
-    for idx, _ in enumerate(width):
-        side_1 = length[idx] * width[idx]
-        side_2 = width[idx] * height[idx]
+    for idx, w_item in enumerate(width):
+        side_1 = length[idx] * w_item
+        side_2 = w_item * height[idx]
         side_3 = height[idx] * length[idx]
         smallest_side = min(side_1, side_2, side_3)
 

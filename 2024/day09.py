@@ -41,7 +41,7 @@ def get_input(file_path: str) -> tuple[list, list, dict, list]:
 
 @profiler
 def part_1(disk_space: list, empty_space: list) -> int:
-    """Switch the positions memory cells with an empty space as far left to it as possible"""
+    """Switch the positions of memory cells with an empty space as far left to it as possible"""
     for num_index in range(len(disk_space) - 1, 0, -1):
         if disk_space[num_index] != ".":
             # Get the index of the first possible space

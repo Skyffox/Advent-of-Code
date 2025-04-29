@@ -32,8 +32,8 @@ def part_2(lst: list) -> int:
         else:
             floor -= 1
 
-        if floor == -1:
-            return idx + 1
+            if floor == -1:
+                return idx + 1
 
     return floor
 

@@ -12,12 +12,8 @@ from utils import profiler
 
 def get_input(file_path: str) -> list:
     """Get the input data"""
-    lst = []
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            lst.append(list(line.strip()))
-
-    return lst
+        return [list(line.strip()) for line in file]
 
 
 def is_valid(x: int, y: int, grid: list) -> bool:
@@ -59,7 +55,7 @@ def find_groups(grid: list) -> list:
 
 
 def find_consecutive_positions(positions: list, check_vertical=False) -> list:
-    """a"""
+    """Find sequences of the same value for a given coordinate"""
     # Sort the positions first by x-coordinate (row) and then by y-coordinate (column)
     sorted_positions = sorted(positions)
     x, y = 0, 1
@@ -71,7 +67,6 @@ def find_consecutive_positions(positions: list, check_vertical=False) -> list:
 
     groups = []
 
-    # Find horizontal sequences (same row, consecutive columns)
     current_group = []
     for idx, pos in enumerate(sorted_positions):
         if not current_group:
@@ -143,7 +138,7 @@ def part_two(grid: list) -> int:
                         nx, ny = x + dx, y + dy
                         valid = is_valid(nx, ny, grid)
                         # Add a fence when our number from the current position is different from our original
-                        # We may play fences outside the grid because we place them in positions around the current position
+                        # We may place fences outside the grid because we place them in positions around the current position
                         if (valid and grid[ny][nx] != number) or not valid:
                             visited_fences.append((ny, nx))
 

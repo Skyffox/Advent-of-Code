@@ -1,20 +1,45 @@
-# Part 1: Find the Elf carrying the most Calories.
-# Answer: 72240
+# pylint: disable=line-too-long
+"""
+Part 1: Find the Elf carrying the most Calories.
+Answer: 72240
 
-# Part 2: Find the top three Elves carrying the most Calories.
-# Answer: 210957
+Part 2: Find the top three Elves carrying the most Calories.
+Answer: 210957
+"""
 
-with open("inputs/1_input.txt") as f:  
-    sum_lst = []
+from utils import profiler
+
+
+def get_input(file_path: str) -> list:
+    """Get the input data"""
+    lst = []
     total = 0
-    for line in f:
-        line = line.strip()
-        if line == '':
-            sum_lst.append(total)
-            total = 0
-            continue
-        total += int(line)
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if line == "":
+                lst.append(total)
+                total = 0
+                continue
+            total += int(line)
 
-lst = sorted(sum_lst, reverse=True)
-print("Maximum calories an elf brought is:", lst[0])
-print("Total top three:", sum(lst[0:3]))
+    return lst
+
+
+@profiler
+def part_1(sum_lst: list) -> int:
+    """Get the elf with the most calories"""
+    return sorted(sum_lst, reverse=True)[0]
+
+
+@profiler
+def part_2(sum_lst: list) -> int:
+    """Get the top 3 elves with the most calories"""
+    return sum(sorted(sum_lst, reverse=True)[0:3])
+
+
+if __name__ == "__main__":
+    input_data = get_input("inputs/1_input.txt")
+
+    print(f"Part 1: {part_1(input_data)}")
+    print(f"Part 2: {part_2(input_data)}")

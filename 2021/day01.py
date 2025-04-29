@@ -12,32 +12,20 @@ from utils import profiler
 
 def get_input(file_path: str) -> tuple[list, list]:
     """Get the input data"""
-    lst = []
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            lst.append(int(line.strip()))
-
-    return lst
+        return [int(line.strip()) for line in file]
 
 
 @profiler
 def part_1(lst: list) -> int:
-    """a"""
-    n = 0
-    for x in range(len(lst) - 1):
-        if lst[x+1] > lst[x]:
-            n += 1
-    return n
+    """Compare each subsequent number in a list and detect each time an increase happens"""
+    return sum([1 for i in range(len(lst) - 1) if lst[i + 1] > lst[i]])
 
 
 @profiler
 def part_2(lst: list) -> int:
-    """a"""
-    n = 0
-    for x in range(len(lst) - 3):
-        if lst[x+3] > lst[x]:
-            n += 1
-    return n
+    """Compare over steps of 3 and compare the first and last of each step to determine an increase or decrease"""
+    return sum([1 for i in range(len(lst) - 3) if lst[i + 3] > lst[i]])
 
 
 if __name__ == "__main__":

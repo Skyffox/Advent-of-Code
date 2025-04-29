@@ -1,9 +1,9 @@
 # pylint: disable=line-too-long
 """
-Part 1: Predict the motion of the robot and boxes in the warehouse. After the robot is finished moving, what is the sum of all boxes' GPS coordinates?
+Part 1: Predict the motion of the robot and boxes in the warehouse. After the robot is finished moving, what is the sum of all boxes GPS coordinates?
 Answer: 1479679
 
-Part 2: Predict the motion of the robot and boxes in this new, scaled-up warehouse. What is the sum of all boxes' final GPS coordinates?
+Part 2: Predict the motion of the robot and boxes in this new, scaled-up warehouse. What is the sum of all boxes final GPS coordinates?
 Answer: 1509780
 """
 
@@ -77,7 +77,7 @@ def part_one(grid, instructions):
         else:
             robot_pos = next_pos
 
-    # find the sum of all boxes GPS coordinates after the robot finishes moving
+    # Find the sum of all boxes GPS coordinates after the robot finishes moving
     return sum([100 * y + x for x, y in boxes])
 
 
@@ -123,6 +123,7 @@ def part_two(grid, instructions):
     ##.....@....##          ##..........##
     ##############          ##############
     """
+    # Extend everything in the new grid
     new_grid = []
     for line in grid:
         row = []

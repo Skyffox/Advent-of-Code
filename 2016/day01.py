@@ -10,21 +10,23 @@ Answer: 143
 from utils import profiler
 
 
-def move(orientation, direction, distance, pos, visited):
-    """A"""
-    # Some cases we move in the same direction
+def move(orientation: str, direction: str, distance: int, pos: tuple[int, int], visited: list) -> tuple[str, tuple[int, int], list]:
+    """
+    Our new orientation is based on our current orientation and the direction from the input. Then move a
+    In that new direction for an amount of steps equal to distance and add these new positions to visited.
+    """
     if (orientation == "N" and direction == "L") or (orientation == "S" and direction == "R"):
         orientation = "W"
         for x in range(pos[0], pos[0] - distance, -1):
             pos[0] -= 1
             visited.append([x-1, pos[1]]) 
-    
+
     elif (orientation == "N" and direction == "R") or (orientation == "S" and direction == "L"):
         orientation = "E"
         for x in range(pos[0], pos[0] + distance):
             pos[0] += 1
             visited.append([x+1, pos[1]]) 
-    
+
     elif (orientation == "W" and direction == "L") or (orientation == "E" and direction == "R"):
         orientation = "S"
         for y in range(pos[1], pos[1] - distance, -1):
@@ -40,36 +42,36 @@ def move(orientation, direction, distance, pos, visited):
     return orientation, pos, visited
 
 
-def get_input(file_path: str) -> tuple[list, list]:
+def get_input(file_path: str) -> list:
     """Get the input data"""
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
-            instructions = line.strip().split(", ")
-
-    return instructions
+            return line.strip().split(", ")
 
 
 @profiler
 def part_1(instructions: list) -> int:
-    """a"""
+    """Execute each instruction which will move us in a certain direction for an amount of steps"""
     pos = [0, 0]
     visited = [[0, 0]]
     orientation = "N"
 
     for instruction in instructions:
-        instruction = [c for c in instruction]
         orientation, pos, visited = move(orientation, instruction[0], int("".join(instruction[1:])), pos, visited)
 
+    # Return what positions we visited, as we need it for part 2
     return abs(pos[0]) + abs(pos[1]), visited
 
 
 @profiler
 def part_2(visited: list) -> int:
-    """a"""
-    for idx, v2 in enumerate(visited):
-        # See what position occurs in the rest of the list
-        if v2 in visited[idx+1:]:
-            return abs(v2[0]) + abs(v2[1])
+    """See if we have visited a position prior"""
+    positions = set()
+    for pos in visited:
+        if tuple(pos) in positions:
+            return abs(pos[0]) + abs(pos[1])
+
+        positions.add(tuple(pos))
 
 
 if __name__ == "__main__":
