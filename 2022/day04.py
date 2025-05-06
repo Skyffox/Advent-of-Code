@@ -1,46 +1,72 @@
 # pylint: disable=line-too-long
 """
-Part 1: In how many assignment pairs does one range fully contain the other?
+Day 4: Camp Cleanup
+
+Part 1: In how many assignment pairs does one range fully contain the other?  
 Answer: 644
 
-Part 2: In how many assignment pairs do the ranges overlap?
+Part 2: In how many assignment pairs do the ranges overlap?  
 Answer: 926
 """
 
+from typing import List, Tuple
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> List[Tuple[Tuple[int, int], Tuple[int, int]]]:
+    """
+    Parse input into pairs of integer ranges.
+
+    Args:
+        file_path (str): Path to input file.
+
+    Returns:
+        List[Tuple[Tuple[int, int], Tuple[int, int]]]: List of assignment range pairs.
+    """
+    assignments = []
     with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip().split(",") for line in file]
+        for line in file:
+            first, second = line.strip().split(",")
+            a_start, a_end = map(int, first.split("-"))
+            b_start, b_end = map(int, second.split("-"))
+            assignments.append(((a_start, a_end), (b_start, b_end)))
+    return assignments
 
 
 @profiler
-def part_1(assignments: list) -> int:
-    """See if either range fits into the other one"""
-    count = 0
-    for line in assignments:
-        r1, r2 = line[0].split("-"), line[1].split("-")
+def part_1(assignments: List[Tuple[Tuple[int, int], Tuple[int, int]]]) -> int:
+    """
+    Count how many times one range fully contains the other.
 
-        if int(r1[0]) >= int(r2[0]) and int(r1[1]) <= int(r2[1]) or \
-           int(r2[0]) >= int(r1[0]) and int(r2[1]) <= int(r1[1]):
+    Args:
+        assignments (List[Tuple]): List of range pairs.
+
+    Returns:
+        int: Count of fully contained ranges.
+    """
+    count = 0
+    for (a_start, a_end), (b_start, b_end) in assignments:
+        if (a_start >= b_start and a_end <= b_end) or (b_start >= a_start and b_end <= a_end):
             count += 1
 
     return count
 
 
 @profiler
-def part_2(assignments: list) -> int:
-    """Instead of counting full overlap like in part 1 we count partial overlap"""
-    count = 0
-    for line in assignments:
-        r1, r2 = line[0].split("-"), line[1].split("-")
+def part_2(assignments: List[Tuple[Tuple[int, int], Tuple[int, int]]]) -> int:
+    """
+    Count how many range pairs have any overlap.
 
-        for r in range(int(r1[0]), int(r1[1]) + 1):
-            if r in range(int(r2[0]), int(r2[1]) + 1):
-                count += 1
-                break
+    Args:
+        assignments (List[Tuple]): List of range pairs.
+
+    Returns:
+        int: Count of overlapping ranges.
+    """
+    count = 0
+    for (a_start, a_end), (b_start, b_end) in assignments:
+        if a_start <= b_end and b_start <= a_end:
+            count += 1
 
     return count
 

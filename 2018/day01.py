@@ -1,39 +1,65 @@
 # pylint: disable=line-too-long
 """
-Part 1: Calculate the eventual frequency we end up on
+Day 1: Chronal Calibration
+
+Part 1: Calculate the resulting frequency after applying all frequency changes.  
 Answer: 505
 
-Part 2: Find the frequency we land on twice for the first time
+Part 2: Find the first frequency that is reached twice when applying changes in a loop.  
 Answer: 72330
 """
 
+from typing import List
 from utils import profiler
 
 
-def get_input(file_path: str) -> tuple[list, list]:
-    """Get the input data"""
+def get_input(file_path: str) -> List[int]:
+    """
+    Reads frequency changes from the input file.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        List[int]: A list of integer frequency changes.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
         return [int(line.strip()) for line in file]
 
 
 @profiler
-def part_1(lst: list) -> int:
-    """The input is just some additions or subtractions, so in Python we can just take the sum() of those"""
-    return sum(lst)
+def part_1(changes: List[int]) -> int:
+    """
+    Calculates the resulting frequency after applying all changes once.
+
+    Args:
+        changes (List[int]): The list of frequency changes.
+
+    Returns:
+        int: The final frequency.
+    """
+    return sum(changes)
 
 
 @profiler
-def part_2(lst: list) -> int:
-    """Return the frequency we have already seen"""
-    seen_frequencies = {0}
-    curr_freq = 0
-    while True:
-        for f in lst:
-            curr_freq += f
-            if curr_freq in seen_frequencies:
-                return curr_freq
+def part_2(changes: List[int]) -> int:
+    """
+    Finds the first frequency that is reached twice by repeatedly applying the changes.
 
-            seen_frequencies.add(curr_freq)
+    Args:
+        changes (List[int]): The list of frequency changes.
+
+    Returns:
+        int: The first repeated frequency.
+    """
+    seen = {0}
+    current = 0
+    while True:
+        for change in changes:
+            current += change
+            if current in seen:
+                return current
+            seen.add(current)
 
 
 if __name__ == "__main__":

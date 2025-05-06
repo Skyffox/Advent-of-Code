@@ -1,51 +1,82 @@
 # pylint: disable=line-too-long
 """
-Part 1: Find all valid triangles, where the two smallest sides must be bigger than the largest side
+Day 3: Squares With Three Sides
+
+Part 1: Count how many valid triangles exist where the two smallest sides are greater than the largest side.  
 Answer: 917
 
-Part 2: Look at the first column of the input and determine the same thing from there
+Part 2: Consider vertical groups of three triangles (based on columns), then determine how many valid triangles there are.  
 Answer: 1649
 """
 
+from typing import List
 from copy import deepcopy
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
-    lst = []
+def get_input(file_path: str) -> List[List[int]]:
+    """
+    Parses the input file and returns a list of lists, where each inner list represents the sides of a triangle.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        List[List[int]]: List of triangle sides.
+    """
+    triangles = []
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
-            lst.append(list(map(int, line.split())))
+            # Split the line into integers representing the triangle sides
+            triangles.append(list(map(int, line.split())))
 
-    return lst
-
-
-@profiler
-def part_1(lst: list) -> int:
-    """Sort the list to find the smallest sides"""
-    n = 0
-    for line in lst:
-        line.sort()
-        if line[0] + line[1] > line[2]:
-            n += 1
-
-    return n
+    return triangles
 
 
 @profiler
-def part_2(lst: list) -> int:
-    """Take 3 sublists and compare the indices of these sublists to form a triangle"""
-    n = 0
-    for i in range(len(lst) // 3):
+def part_1(triangles: List[List[int]]) -> int:
+    """
+    Validates triangles by checking if the sum of the two smallest sides is greater than the largest side.
+
+    Args:
+        triangles (List[List[int]]): List of triangle side lengths.
+
+    Returns:
+        int: The number of valid triangles.
+    """
+    valid_count = 0
+    for triangle in triangles:
+        triangle.sort()
+        # Check if the sum of the two smallest sides is greater than the largest side
+        if triangle[0] + triangle[1] > triangle[2]:
+            valid_count += 1
+
+    return valid_count
+
+
+@profiler
+def part_2(triangles: List[List[int]]) -> int:
+    """
+    Validates triangles by examining vertical groups of three numbers (columns) and checking validity.
+
+    Args:
+        triangles (List[List[int]]): List of triangle side lengths.
+
+    Returns:
+        int: The number of valid triangles when considering columns.
+    """
+    valid_count = 0
+    # Process triangles in vertical groups of three
+    for i in range(len(triangles) // 3):
         for j in range(3):
-            # Determine the vertical values from the column
-            ln = [lst[i * 3][j], lst[i * 3 + 1][j], lst[i * 3 + 2][j]]
-            ln.sort()
-            if ln[0] + ln[1] > ln[2]:
-                n += 1
+            # Extract the three values in the current column
+            column = [triangles[i * 3][j], triangles[i * 3 + 1][j], triangles[i * 3 + 2][j]]
+            column.sort()
+            # Check if the sum of the two smallest sides is greater than the largest side
+            if column[0] + column[1] > column[2]:
+                valid_count += 1
 
-    return n
+    return valid_count
 
 
 if __name__ == "__main__":

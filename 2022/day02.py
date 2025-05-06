@@ -1,83 +1,71 @@
 # pylint: disable=line-too-long
 """
-Part 1: What would your total score be if everything goes exactly according to your strategy guide?
+Day 2: Rock Paper Scissors
+
+Part 1: What would your total score be if everything goes exactly according to your strategy guide?  
 Answer: 11666
 
-Part 2: Following the Elf's instructions for the second column, what would your total score be if everything goes exactly according to your strategy guide?
+Part 2: Following the Elf's instructions for the second column, what would your total score be if everything goes exactly according to your strategy guide?  
 Answer: 12767
 """
 
+from typing import List
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> List[List[str]]:
+    """
+    Parse the input file into a list of (enemy, player/outcome) moves.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        List[List[str]]: List of rounds, each with enemy move and your move or outcome.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip().split(" ") for line in file]
+        return [line.strip().split() for line in file]
 
 
 @profiler
-def part_1(matches: list) -> int:
-    """a"""
-    score = 0
-    for (enemy, player) in matches:
-        if enemy == "A":
-            if player == "X":
-                score += 4
-            if player == "Y":
-                score += 8
-            if player == "Z":
-                score += 3
+def part_1(rounds: List[List[str]]) -> int:
+    """
+    Compute the total score using the given strategy guide.
+    
+    The second column represents your move:  
+    X = Rock, Y = Paper, Z = Scissors.  
+    The score is the sum of shape score + outcome score.
 
-        if enemy == "B":
-            if player == "X":
-                score += 1
-            if player == "Y":
-                score += 5
-            if player == "Z":
-                score += 9
+    Returns:
+        int: Total score.
+    """
+    score_map = {
+        ("A", "X"): 4, ("A", "Y"): 8, ("A", "Z"): 3,
+        ("B", "X"): 1, ("B", "Y"): 5, ("B", "Z"): 9,
+        ("C", "X"): 7, ("C", "Y"): 2, ("C", "Z"): 6,
+    }
 
-        if enemy == "C":
-            if player == "X":
-                score += 7
-            if player == "Y":
-                score += 2
-            if player == "Z":
-                score += 6
-
-    return score
+    return sum(score_map[(enemy, player)] for enemy, player in rounds)
 
 
 @profiler
-def part_2(matches: list) -> int:
-    """a"""
-    score = 0
-    for (enemy, outcome) in matches:
-        if enemy == "A":
-            if outcome == "X":
-                score += 3
-            if outcome == "Y":
-                score += 4
-            if outcome == "Z":
-                score += 8
+def part_2(rounds: List[List[str]]) -> int:
+    """
+    Compute the total score using the corrected interpretation of the strategy guide.
 
-        if enemy == "B":
-            if outcome == "X":
-                score += 1
-            if outcome == "Y":
-                score += 5
-            if outcome == "Z":
-                score += 9
+    The second column now represents the desired outcome:  
+    X = Lose, Y = Draw, Z = Win.
 
-        if enemy == "C":
-            if outcome == "X":
-                score += 2
-            if outcome == "Y":
-                score += 6
-            if outcome == "Z":
-                score += 7
+    Returns:
+        int: Total score.
+    """
+    outcome_map = {
+        ("A", "X"): 3, ("A", "Y"): 4, ("A", "Z"): 8,
+        ("B", "X"): 1, ("B", "Y"): 5, ("B", "Z"): 9,
+        ("C", "X"): 2, ("C", "Y"): 6, ("C", "Z"): 7,
+    }
 
-    return score
+    return sum(outcome_map[(enemy, outcome)] for enemy, outcome in rounds)
 
 
 if __name__ == "__main__":

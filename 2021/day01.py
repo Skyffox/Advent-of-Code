@@ -1,31 +1,58 @@
 # pylint: disable=line-too-long
 """
-Part 1: See how many times there is an increase or decrease in the data
+Day 1: Sonar Sweep
+
+Part 1: See how many times there is an increase or decrease in the data.
 Answer: 1624
 
-Part 2: Instead compare it over a window of 3 items, in this case we only compare the first and the last of that window
+Part 2: Instead, compare it over a window of 3 items. In this case, we only compare the first and the last of that window.
 Answer: 1653
 """
 
+from typing import List
 from utils import profiler
 
 
-def get_input(file_path: str) -> tuple[list, list]:
-    """Get the input data"""
+def get_input(file_path: str) -> List[int]:
+    """
+    Reads the input data from the specified file and returns a list of integers.
+
+    Args:
+        file_path (str): Path to the input file containing the list of numbers.
+
+    Returns:
+        List[int]: A list of integers representing the sonar readings.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
         return [int(line.strip()) for line in file]
 
 
 @profiler
-def part_1(lst: list) -> int:
-    """Compare each subsequent number in a list and detect each time an increase happens"""
-    return sum([1 for i in range(len(lst) - 1) if lst[i + 1] > lst[i]])
+def part_1(lst: List[int]) -> int:
+    """
+    Count the number of times a number increases from the previous number in the list.
+
+    Args:
+        lst (List[int]): A list of integers representing sonar readings.
+
+    Returns:
+        int: The number of times an increase occurs between subsequent numbers.
+    """
+    return sum(1 for i in range(len(lst) - 1) if lst[i + 1] > lst[i])
 
 
 @profiler
-def part_2(lst: list) -> int:
-    """Compare over steps of 3 and compare the first and last of each step to determine an increase or decrease"""
-    return sum([1 for i in range(len(lst) - 3) if lst[i + 3] > lst[i]])
+def part_2(lst: List[int]) -> int:
+    """
+    Count the number of times a sum of a window of 3 numbers increases from the previous sum.
+
+    Args:
+        lst (List[int]): A list of integers representing sonar readings.
+
+    Returns:
+        int: The number of times a 3-number sliding window sum increases.
+    """
+    return sum(1 for i in range(len(lst) - 3) if lst[i + 3] > lst[i])
 
 
 if __name__ == "__main__":

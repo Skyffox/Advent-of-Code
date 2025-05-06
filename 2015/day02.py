@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
 """
+Day 2: I Was Told There Would Be No Math
+
 Part 1: How much wrapping paper is needed for a present with certain dimensions
 Answer: 1588178
 
@@ -7,30 +9,49 @@ Part 2: The elves want a ribbon to wrap the present, calculate how much feet the
 Answer: 3783758
 """
 
+from typing import Tuple, List
 from utils import profiler
 
 
-def get_input(file_path: str) -> tuple[list, list, list]:
-    """Get the input data"""
-    width, length, height = [], [], []
+def get_input(file_path: str) -> Tuple[List[int], List[int], List[int]]:
+    """
+    Parses the input file and extracts dimensions of each present.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        Tuple[List[int], List[int], List[int]]: Lists of widths, lengths, and heights.
+    """
+    widths, lengths, heights = [], [], []
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
-            line = list(map(int, line.strip().split("x")))
-            width.append(line[0])
-            length.append(line[1])
-            height.append(line[2])
+            l, w, h = map(int, line.strip().split("x"))
+            lengths.append(l)
+            widths.append(w)
+            heights.append(h)
 
-    return width, length, height
+    return widths, lengths, heights
 
 
 @profiler
-def part_1(width: list, length: list, height: list) -> int:
-    """Find the surface area for the amount of wrapping paper we need"""
+def part_1(widths: List[int], lengths: List[int], heights: List[int]) -> int:
+    """
+    Calculates the total amount of wrapping paper needed.
+
+    Args:
+        widths (List[int]): List of present widths.
+        lengths (List[int]): List of present lengths.
+        heights (List[int]): List of present heights.
+
+    Returns:
+        int: Total square feet of wrapping paper required.
+    """
     total = 0
-    for idx, w_item in enumerate(width):
-        side_1 = length[idx] * w_item
-        side_2 = w_item * height[idx]
-        side_3 = height[idx] * length[idx]
+    for idx, w_item in enumerate(widths):
+        side_1 = lengths[idx] * w_item
+        side_2 = w_item * heights[idx]
+        side_3 = heights[idx] * lengths[idx]
         smallest_side = min(side_1, side_2, side_3)
 
         total += 2 * side_1 + 2 * side_2 + 2 * side_3 + smallest_side
@@ -39,31 +60,32 @@ def part_1(width: list, length: list, height: list) -> int:
 
 
 @profiler
-def part_2(width: list, length: list, height: list) -> int:
+def part_2(widths: List[int], lengths: List[int], heights: List[int]) -> int:
     """
-    The ribbon required to wrap a present is the shortest distance around its sides, 
-    or the smallest perimeter of any one face
+    Calculates the total amount of ribbon required.
+
+    Ribbon = smallest perimeter of any one face + volume of the box.
+
+    Args:
+        widths (List[int]): List of present widths.
+        lengths (List[int]): List of present lengths.
+        heights (List[int]): List of present heights.
+
+    Returns:
+        int: Total feet of ribbon required.
     """
     total = 0
-    for idx, _ in enumerate(width):
-        bow = width[idx] * length[idx] * height[idx]
-        biggest_side = max(width[idx], length[idx], height[idx])
-
-        ribbon = 0
-        if width[idx] == biggest_side:
-            ribbon = 2 * length[idx] + 2 * height[idx]
-        elif length[idx] == biggest_side:
-            ribbon = 2 * width[idx] + 2 * height[idx]
-        else:
-            ribbon = 2 * width[idx] + 2 * length[idx]
-
-        total += ribbon + bow
+    for i, w in enumerate(widths):
+        dimensions = sorted([w, lengths[i], heights[i]])
+        perimeter = 2 * (dimensions[0] + dimensions[1])
+        bow = dimensions[0] * dimensions[1] * dimensions[2]
+        total += perimeter + bow
 
     return total
 
 
 if __name__ == "__main__":
-    w, l, h = get_input("inputs/2_input.txt")
+    width, length, height = get_input("inputs/2_input.txt")
 
-    print(f"Part 1: {part_1(w, l, h)}")
-    print(f"Part 2: {part_2(w, l, h)}")
+    print(f"Part 1: {part_1(width, length, height)}")
+    print(f"Part 2: {part_2(width, length, height)}")

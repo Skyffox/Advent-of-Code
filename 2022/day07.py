@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
 """
+Day 7: No Space Left On Device
+
 Part 1: Find all of the directories with a total size of at most 100000. What is the sum of the total sizes of those directories?
 Answer: 1583951
 
@@ -7,37 +9,46 @@ Part 2: Find the smallest directory that, if deleted, would free up enough space
 Answer: 214171
 """
 
+from typing import Dict, Tuple, List
 from utils import profiler
 
 
-def get_input(file_path: str) -> dict:
+def get_input(file_path: str) -> Dict[Tuple[str, ...], List[Tuple[str, int]]]:
     """
-    We parse the input to build a filesystem dictionary where each key is a directory path (as a tuple of directory names), 
-    and the value is a list of files and subdirectories under that directory.
-    Files are represented with their sizes, and directories are marked with a size of 0.
+    Parses the input file into a simulated filesystem.
+
+    Each directory is represented by a path tuple, and contains a list of its contents.
+    Files have an associated size; directories are listed with size 0.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        dict: A mapping of directory paths to their contents.
     """
     filesystem = {}
     current_path = []
+
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
             line = line.strip()
             if line.startswith("$ cd"):
-                # Changing directory
-                path = line.split(" ")[2]
-                if path == "..":
+                # Navigate directories
+                target = line.split(" ")[2]
+                if target == "..":
                     current_path.pop()
+                elif target == "/":
+                    current_path = ["/"]
                 else:
-                    current_path.append(path)
+                    current_path.append(target)
             elif line.startswith("$ ls"):
                 continue
             else:
-                # File or directory listing
-                size, name = line.split(" ", 1)
+                size_str, name = line.split(" ", 1)
                 # If it's a file, we capture its size, dirs have 0 size
-                size = int(size) if size != "dir" else 0
-
-                # Traverse the path to ensure all directories are created
+                size = int(size_str) if size_str != "dir" else 0
                 full_path = tuple(current_path)
+
                 if full_path not in filesystem:
                     filesystem[full_path] = []
 
@@ -46,20 +57,24 @@ def get_input(file_path: str) -> dict:
     return filesystem
 
 
-def calculate_sizes(filesystem):
-    """"
-    We recursively calculate the total size of each directory. If the directory contains subdirectories, 
-    their sizes are calculated and included in the total size.
+def calculate_sizes(filesystem: Dict[Tuple[str, ...], List[Tuple[str, int]]]) -> Dict[Tuple[str, ...], int]:
+    """
+    Recursively calculates the total size of each directory.
+
+    Args:
+        filesystem (dict): The simulated filesystem structure.
+
+    Returns:
+        dict: A mapping of directory paths to their total sizes.
     """
     directory_sizes = {}
 
-    def get_size(path):
+    def get_size(path: Tuple[str, ...]) -> int:
         if path in directory_sizes:
             return directory_sizes[path]
 
         total_size = 0
         for name, size in filesystem.get(path, []):
-            # It's a file else it's a directory and we will recursiively get its size
             if size > 0:
                 total_size += size
             else:
@@ -68,7 +83,6 @@ def calculate_sizes(filesystem):
         directory_sizes[path] = total_size
         return total_size
 
-    # Calculate sizes for all directories
     for path in filesystem:
         get_size(path)
 
@@ -76,28 +90,43 @@ def calculate_sizes(filesystem):
 
 
 @profiler
-def part_1(filesystem):
-    """"We sum the sizes of all directories that are smaller than 100000"""
-    directory_sizes = calculate_sizes(filesystem)
+def part_1(filesystem: Dict[Tuple[str, ...], List[Tuple[str, int]]]) -> int:
+    """
+    Sums the sizes of all directories whose total size does not exceed 100000.
 
-    # Part 1: Find the sum of the sizes of all directories smaller than 100000
-    return sum(size for size in directory_sizes.values() if size <= 100000)
+    Args:
+        filesystem (dict): The parsed filesystem.
+
+    Returns:
+        int: The total size of all qualifying directories.
+    """
+    sizes = calculate_sizes(filesystem)
+    return sum(size for size in sizes.values() if size <= 100_000)
 
 
 @profiler
-def part_2(filesystem, total_disk_space=70000000, required_free_space=30000000):
+def part_2(
+    filesystem: Dict[Tuple[str, ...], List[Tuple[str, int]]],
+    total_disk_space: int = 70_000_000,
+    required_free_space: int = 30_000_000
+) -> int:
     """
-    We calculate the total used space and determine how much free space is needed to meet the required free space. 
-    The solution to Part 2 is the size of the smallest directory that can be deleted to free up enough space.
+    Finds the smallest directory that can be deleted to free up enough space.
+
+    Args:
+        filesystem (dict): The parsed filesystem.
+        total_disk_space (int): Total available disk space.
+        required_free_space (int): Space needed after cleanup.
+
+    Returns:
+        int: Size of the smallest deletable directory that satisfies the constraint.
     """
-    directory_sizes = calculate_sizes(filesystem)
+    sizes = calculate_sizes(filesystem)
+    used_space = sizes[('/',)]
+    current_free = total_disk_space - used_space
+    needed_space = required_free_space - current_free
 
-    # Get the root directory
-    used_space = directory_sizes['/',]
-    free_space = total_disk_space - used_space
-    space_needed = required_free_space - free_space
-
-    return min((size for size in directory_sizes.values() if size >= space_needed), default=None)
+    return min((size for size in sizes.values() if size >= needed_space), default=0)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
 """
+Day 17: Pyroclastic Flow
+
 Part 1: How many units tall will the tower of rocks be after 2022 rocks have stopped falling?
 Answer: 3239
 
@@ -7,19 +9,34 @@ Part 2: How tall will the tower be after 1000000000000 rocks have stopped?
 Answer: 1594842406882
 """
 
+from collections import defaultdict
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> str:
+    """
+    Read the jet pattern input from a file.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        str: A single-line string representing the jet pattern sequence ('<' or '>').
+    """
     with open(file_path, "r", encoding="utf-8") as file:
         return file.readlines()[0]
 
 
 def new_rock(h: int, n: int) -> list:
     """
-    Return a rock with a certain form and place it two spaces to the right and three places up, 
-    otherwise it might collide with the biggest rock (Vertical line)
+    Generate a new rock shape positioned at a height `h`, based on the rock index.
+
+    Args:
+        h (int): Current height of the tower.
+        n (int): Rock index (0-4), determines shape.
+
+    Returns:
+        list: A list of (x, y) coordinate tuples representing the rock's blocks.
     """
     if n == 0:   # Horizontal line
         return [(2, h + 3), (3, h + 3), (4, h + 3), (5, h + 3)]
@@ -33,104 +50,109 @@ def new_rock(h: int, n: int) -> list:
         return [(2, h + 3), (3, h + 3), (2, h + 4), (3, h + 4)]
 
 
-def can_place_rock(rock: tuple[int, int], columns: dict) -> bool:
-    """Check whether new position collides with wall or another rock, does a check for horizontal movement and vertical"""
+def can_place_rock(rock: list, columns: defaultdict) -> bool:
+    """
+    Determine if the given rock can be placed at the current position.
+
+    Args:
+        rock (list): List of (x, y) coordinates representing the rock.
+        columns (defaultdict): Map of column indices to sets of occupied y-values.
+
+    Returns:
+        bool: True if the rock can be placed (no collisions or boundary violations), else False.
+    """
     for x, y in rock:
         if y < 0 or x < 0 or x >= 7 or y in columns[x]:
             return False
     return True
 
 
-def update_pos(column: dict[set], rock: list) -> dict:
-    """Update the positions in the column with the latest position of a rock"""
-    for coord in rock:
-        rx, ry = coord
-        column[rx].add(ry)
-    return column
+def update_pos(columns: defaultdict, rock: list) -> defaultdict:
+    """
+    Update the tower structure with the new rock's final position.
+
+    Args:
+        columns (defaultdict): Current column height map.
+        rock (list): List of (x, y) positions of the placed rock.
+
+    Returns:
+        defaultdict: Updated column height map.
+    """
+    for x, y in rock:
+        columns[x].add(y)
+    return columns
 
 
 @profiler
-def simulate_rock_fall(jet_pattern, total_rocks):
-    """Simulate the falling of num_rocks based on the jet_pattern"""
-    columns = {
-        # key (0-7) is the column index. value is a set of occupied y coordinates
-        0: set(),
-        1: set(),
-        2: set(),
-        3: set(),
-        4: set(),
-        5: set(),
-        6: set()
-    }
+def simulate_rock_fall(jet_pattern: str, total_rocks: int) -> int:
+    """
+    Simulate falling rocks under the influence of a jet pattern and calculate final tower height.
 
+    This function supports both Part 1 (2022 rocks) and Part 2 (1 trillion rocks) by detecting cycles
+    in rock behavior and fast-forwarding through repeating patterns to optimize performance.
+
+    Args:
+        jet_pattern (str): Sequence of '<' and '>' characters that move rocks left or right.
+        total_rocks (int): Total number of rocks to simulate.
+
+    Returns:
+        int: Final height of the tower after all rocks have been placed.
+    """
+    columns = defaultdict(set) # Using defaultdict for easier set management
     jet_index = 0
     height = 0
     rock_count = 0
-    temp_rock = (0, 0)
 
     # Part 2 variables
     states = {}
     cycle_found = False
     height_increase = 0
 
-    # Simulate the falling of rocks
     while rock_count < total_rocks:
         # Start by placing the rock at the top of the column. Repeat the rock shapes in cycle
         rock = new_rock(height, rock_count % 5)
 
-        # Apply gas jets and move the rock down
         while True:
-            # Move the rock horizontally based on the jet pattern
+            # Apply jet pattern to move the rock horizontally
             jet_move = jet_pattern[jet_index % len(jet_pattern)]
             jet_index += 1
+            temp_rock = [(x + 1, y) if jet_move == ">" else (x - 1, y) for x, y in rock]
 
-            # Move left or right based on the jet move
-            if jet_move == ">":
-                temp_rock = [(x + 1, y) for x, y in rock]
-            elif jet_move == "<":
-                temp_rock = [(x - 1, y) for x, y in rock]
-
-            # If we can move horizontally, do so
             if can_place_rock(temp_rock, columns):
                 rock = temp_rock
 
-            # Move the rock downward (fall)
+            # Move rock downward
             temp_rock = [(x, y - 1) for x, y in rock]
             if can_place_rock(temp_rock, columns):
                 rock = temp_rock
             else:
-                # Rock is at rest
-                break
+                break # The rock has landed
 
-        # Update columns with rock's final position
+        # Update columns with the rock's final position
         columns = update_pos(columns, rock)
-        height = max((max(col) for _, col in columns.items() if col), default=0) + 1
+        height = max((max(col) for col in columns.values() if col), default=0) + 1
 
-        # Part 2 stuff to check for states!
+        # Part 2: Detect cycle patterns
         if not cycle_found:
             # Get the maximum height of each column
-            max_cols = [max(max(col) for _, col in columns.items() if col)]
+            max_cols = [max(col) for col in columns.values() if col]
 
             # Adjust the maximum heights so that they are relative to each other
             # so the lowest one will be zero (or -1 for the floor) and the others will
             # be the difference between their height and the lowest.
             min_col = min(max_cols)
-            relative_cols = [mc - min_col for mc in max_cols]
-
+            relative_cols = tuple(mc - min_col for mc in max_cols)
             # Add the rock order (so what tetris shape this is) and the jet index to the state
-            curr_state = relative_cols.extend([rock_count % 5, jet_index % len(jet_pattern)])
-            curr_state = tuple(relative_cols)
+            curr_state = relative_cols + (rock_count % 5, jet_index % len(jet_pattern))
 
             if curr_state in states:
-                # Cycle found! Now we find the various attributes of the cycle
                 cycle_found = True
-
                 rocks_per_cycle = rock_count - states[curr_state]['rock']
                 height_per_cycle = height - states[curr_state]['height']
                 remaining_rocks = total_rocks - rock_count
                 cycles_remaining = remaining_rocks // rocks_per_cycle
                 rock_remainder = remaining_rocks % rocks_per_cycle
-
+                
                 # We have some rocks left to simulate (the remainder) so we calculate the height
                 # increase after all the cycles are done, and set the rock_count so that
                 # we only have the rock_remainder left to simulate

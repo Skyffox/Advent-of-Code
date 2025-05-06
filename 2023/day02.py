@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
 """
+Day 2: Cube Conundrum
+
 Part 1: See if the game is valid by comparing pulled cubes with set maximum
 Answer: 2285
 
@@ -7,19 +9,28 @@ Part 2: See what the maximum amount of cubes is needed to play every game
 Answer: 77021
 """
 
+from typing import List, Tuple
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> List[Tuple[str, List[Tuple[int, str]]]]:
+    """
+    Parse the input file and return game data.
+    Each game consists of a game number and a list of (number, color) tuples representing cube pulls.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        List[Tuple[str, List[Tuple[int, str]]]]: Parsed game data.
+    """
     data = []
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
             line = line.strip().split(":")
-            # Separates the game number from the input
             game = line[0].split(" ")[1]
 
-            # Get a tuple of each number and color which is every instruction for the game
+            # Extract all cube draws as (number, color) tuples
             game_input = [
                 (int(num), color)
                 for part in line[1].split(";")
@@ -32,44 +43,53 @@ def get_input(file_path: str) -> list:
 
 
 @profiler
-def part_1(games: list) -> int:
-    """See if inputs lie within the allowed maximum"""
-    n = 0
-    maximums = {'red' : 12, 'green' : 13, 'blue' : 14}
+def part_1(games: List[Tuple[str, List[Tuple[int, str]]]]) -> int:
+    """
+    Determine the sum of game numbers where all cube pulls are within allowed limits.
 
-    for game in games:
-        valid_input = True
-        game_number, game_inputs = game
-        for num, color in game_inputs:
-            if int(num > maximums[color]):
-                valid_input = False
-                break
+    Args:
+        games (List[Tuple[str, List[Tuple[int, str]]]]): List of games with cube pull details.
 
-        if valid_input:
-            n += int(game_number)
+    Returns:
+        int: Sum of valid game numbers.
+    """
+    total = 0
+    maximums = {'red': 12, 'green': 13, 'blue': 14}
 
-    return n
+    for game_number, game_inputs in games:
+        if all(num <= maximums[color] for num, color in game_inputs):
+            total += int(game_number)
+
+    return total
 
 
 @profiler
-def part_2(games: list) -> int:
-    """t"""
-    n = 0
+def part_2(games: List[Tuple[str, List[Tuple[int, str]]]]) -> int:
+    """
+    For each game, compute the product of the maximum required red, green, and blue cubes.
+    Sum these products over all games.
 
-    for game in games:
+    Args:
+        games (List[Tuple[str, List[Tuple[int, str]]]]): List of games with cube pull details.
+
+    Returns:
+        int: Sum of cube set products for all games.
+    """
+    total = 0
+
+    for _, game_inputs in games:
         max_red, max_green, max_blue = 0, 0, 0
-        _, game_inputs = game
         for num, color in game_inputs:
             if color == 'red':
                 max_red = max(max_red, num)
-            if color == 'green':
+            elif color == 'green':
                 max_green = max(max_green, num)
-            if color == 'blue':
+            elif color == 'blue':
                 max_blue = max(max_blue, num)
 
-        n += (max_red * max_green * max_blue)
+        total += max_red * max_green * max_blue
 
-    return n
+    return total
 
 
 if __name__ == "__main__":

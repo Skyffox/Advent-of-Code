@@ -1,81 +1,104 @@
 # pylint: disable=line-too-long
 """
-Part 1: What is the Manhattan distance from the central port to the closest intersection?
+Day 3: Crossed Wires
+
+Part 1: Calculate the Manhattan distance from the central port (0, 0) to the closest intersection point.
 Answer: 3247
 
-Part 2: What is the fewest combined steps the wires must take to reach an intersection?
+Part 2: Find the fewest combined steps the wires must take to reach an intersection.
 Answer: 48054
 """
 
+from typing import List, Tuple, Dict
 from utils import profiler
 
 
-def get_input(file_path: str) -> tuple[list, list]:
-    """Get the input data"""
-    wires = []
+def get_input(file_path: str) -> List[List[Tuple[str, int]]]:
+    """
+    Parse the input file and return a list of movement instructions for each wire.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        List[List[Tuple[str, int]]]: Parsed movement instructions for each wire.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = list(line.strip().split(","))
-            # Separate the direction and amount we move
-            line = [[l[0], int(l[1:])] for l in line]
-            wires.append(line)
-
-    return wires
+        return [
+            [(move[0], int(move[1:])) for move in line.strip().split(",")]
+            for line in file
+        ]
 
 
-def get_path(instructions):
-    """Add the new position to the path"""
-    x, y = 0, 0
-    path = []
+def get_path_map(instructions: List[Tuple[str, int]]) -> Dict[Tuple[int, int], int]:
+    """
+    Generate a path map for a wire, recording the number of steps taken to reach each coordinate.
 
-    for direction, steps in instructions:
-        for _ in range(steps):
-            if direction == 'U':
-                y += 1
-            elif direction == 'D':
-                y -= 1
-            elif direction == 'L':
-                x -= 1
-            elif direction == 'R':
-                x += 1
+    Args:
+        instructions (List[Tuple[str, int]]): List of movement directions and step counts.
 
-            path.append((x, y))
+    Returns:
+        Dict[Tuple[int, int], int]: Mapping of coordinates to the step count when first reached.
+    """
+    x, y, steps = 0, 0, 0
+    path = {}
+
+    for direction, dist in instructions:
+        dx, dy = 0, 0
+        if direction == "U":
+            dy = 1
+        elif direction == "D":
+            dy = -1
+        elif direction == "L":
+            dx = -1
+        elif direction == "R":
+            dx = 1
+
+        for _ in range(dist):
+            x += dx
+            y += dy
+            steps += 1
+            if (x, y) not in path:
+                path[(x, y)] = steps
 
     return path
 
 
 @profiler
-def part_1(wires: list) -> int:
-    """Get all the intersections of the two wires, then calculate the distance to each intersection"""
-    # Get the paths for both wires
-    path1 = get_path(wires[0])
-    path2 = get_path(wires[1])
+def part_1(wires: List[List[Tuple[str, int]]]) -> int:
+    """
+    Determine the Manhattan distance from the origin to the closest intersection of the two wires.
 
-    # Find the intersections (excluding the origin)
-    intersections = set(path1).intersection(set(path2))
-    intersections.discard((0, 0))
+    Args:
+        wires (List[List[Tuple[str, int]]]): Movement instructions for both wires.
 
-    # Calculate Manhattan distance for each intersection
+    Returns:
+        int: The Manhattan distance of the closest intersection point.
+    """
+    path1 = get_path_map(wires[0])
+    path2 = get_path_map(wires[1])
+    intersections = set(path1.keys()) & set(path2.keys())
     return min(abs(x) + abs(y) for x, y in intersections)
 
 
 @profiler
-def part_2(wires: list) -> int:
-    """Get all the intersections of the two wires, then calculate the distance to the closest intersection"""
-    # Get the paths for both wires
-    path1 = get_path(wires[0])
-    path2 = get_path(wires[1])
+def part_2(wires: List[List[Tuple[str, int]]]) -> int:
+    """
+    Determine the fewest combined steps required for both wires to reach an intersection.
 
-    # Find the intersections (excluding the origin)
-    intersections = set(path1).intersection(set(path2))
-    intersections.discard((0, 0))
+    Args:
+        wires (List[List[Tuple[str, int]]]): Movement instructions for both wires.
 
-    # We do +2 because of 0 indexing
-    return min([path1.index(x) + path2.index(x) + 2 for x in intersections])
+    Returns:
+        int: Minimum combined step count to an intersection.
+    """
+    path1 = get_path_map(wires[0])
+    path2 = get_path_map(wires[1])
+    intersections = set(path1.keys()) & set(path2.keys())
+    return min(path1[pt] + path2[pt] for pt in intersections)
 
 
 if __name__ == "__main__":
     input_data = get_input("inputs/3_input.txt")
-
     print(f"Part 1: {part_1(input_data)}")
     print(f"Part 2: {part_2(input_data)}")

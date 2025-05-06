@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
 """
+Day 14: Regolith Reservoir
+
 Part 1: How many units of sand come to rest before sand starts flowing into the abyss below?
 Answer: 728
 
@@ -7,11 +9,23 @@ Part 2: Using your scan, simulate the falling sand until the source of the sand 
 Answer: 27623
 """
 
+from typing import List, Tuple
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> List[List[int]]:
+    """
+    Parse the input file to extract the wall coordinates.
+
+    The input consists of coordinates describing the walls of the terrain.
+    For each pair of coordinates, a line is drawn between them, and the terrain is marked by '#' where walls exist.
+    
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        List[List[int]]: A list of wall coordinates where each element is a pair of x and y coordinates.
+    """
     walls = []
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
@@ -38,15 +52,25 @@ def get_input(file_path: str) -> list:
     return walls
 
 
-def draw_canvas(walls, min_x, max_x, max_y):
-    """DRAW: rock as #, air as ., and the source of the sand as +"""
+def draw_canvas(walls: List[List[int]], min_x: int, max_x: int, max_y: int) -> List[List[str]]:
+    """
+    Creates a visual representation of the terrain with walls and sand source.
+
+    Args:
+        walls (List[List[int]]): The list of wall coordinates.
+        min_x (int): The minimum x-coordinate of the grid.
+        max_x (int): The maximum x-coordinate of the grid.
+        max_y (int): The maximum y-coordinate of the grid.
+
+    Returns:
+        List[List[str]]: A 2D grid where walls are represented as '#', air as '.', and the sand source as '+'.
+    """
     canvas = []
     for y in range(max_y + 1):
         canvas_line = []
         for pos_x in range(min_x, max_x + 1):
             if [pos_x, y] in walls:
                 canvas_line.append("# ")
-            # Position where the sand flows from
             elif [pos_x, y] == [500, 0]:
                 canvas_line.append("+ ")
             else:
@@ -56,8 +80,22 @@ def draw_canvas(walls, min_x, max_x, max_y):
     return canvas
 
 
-def sand_propagation(canvas: list, sand_start: tuple[int, int], min_x: int) -> bool:
-    """Sand particles move down if possible otherwise check either direction if there is an air tile"""
+def sand_propagation(canvas: List[List[str]], sand_start: Tuple[int, int], min_x: int) -> bool:
+    """
+    Simulates the movement of a sand particle from the source to the rest position.
+
+    The sand can fall straight down or diagonally left or right depending on the availability of empty space.
+    If the sand reaches the abyss or falls off the grid, the function returns `True` indicating the sand has fallen off.
+    If the sand comes to rest, the function returns `False`.
+
+    Args:
+        canvas (List[List[str]]): The visual grid representing the terrain.
+        sand_start (Tuple[int, int]): The starting position of the sand source.
+        min_x (int): The minimum x-coordinate for the grid.
+
+    Returns:
+        bool: `True` if the sand flows into the abyss, `False` if it comes to rest.
+    """
     y = sand_start[1]
     x = sand_start[0] - min_x
 
@@ -65,13 +103,12 @@ def sand_propagation(canvas: list, sand_start: tuple[int, int], min_x: int) -> b
         if y > len(canvas) - 2 or x < 0 or x > len(canvas[0]) - 1:
             return True
 
-        # Check in which direction the sand can move
-        if canvas[y+1][x] == ". ":
+        if canvas[y + 1][x] == ". ":
             y += 1
-        elif canvas[y+1][x-1] == ". ":
+        elif canvas[y + 1][x - 1] == ". ":
             x -= 1
             y += 1
-        elif canvas[y+1][x+1] == ". ":
+        elif canvas[y + 1][x + 1] == ". ":
             x += 1
             y += 1
         else:
@@ -83,8 +120,17 @@ def sand_propagation(canvas: list, sand_start: tuple[int, int], min_x: int) -> b
 
 
 @profiler
-def part_1(walls: list) -> int:
-    """a"""
+def part_1(walls: List[List[int]]) -> int:
+    """
+    Simulates sand falling into the grid until it overflows or comes to rest.
+    In this part, the goal is to count how many units of sand come to rest before it starts flowing into the abyss.
+    
+    Args:
+        walls (List[List[int]]): A list of wall coordinates.
+
+    Returns:
+        int: The number of sand units that come to rest before the sand overflows into the abyss.
+    """
     overflow_count = 0
 
     min_x = min([x[0] for x in walls])
@@ -95,13 +141,23 @@ def part_1(walls: list) -> int:
 
     while True:
         overflow_count += 1
-        if sand_propagation(canvas, [500, 0], min_x):
+        if sand_propagation(canvas, (500, 0), min_x):
             return overflow_count - 1
 
 
 @profiler
-def part_2(walls: list) -> int:
-    """a"""
+def part_2(walls: List[List[int]]) -> int:
+    """
+    Simulates sand falling until the sand source is blocked.
+    In this part, the goal is to simulate the falling sand until the source becomes blocked, 
+    and then count how many units of sand come to rest.
+
+    Args:
+        walls (List[List[int]]): A list of wall coordinates.
+
+    Returns:
+        int: The number of sand units that come to rest until the source becomes blocked.
+    """
     overflow_count = 0
 
     min_x = min([x[0] for x in walls])
@@ -118,7 +174,7 @@ def part_2(walls: list) -> int:
 
     while True:
         overflow_count += 1
-        if sand_propagation(canvas, [500, 0], min_x):
+        if sand_propagation(canvas, (500, 0), min_x):
             return overflow_count
 
 

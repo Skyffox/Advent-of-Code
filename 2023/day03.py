@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
 """
+Day 3: Gear Ratios
+
 Part 1: Find all numeric values that are adjacent to a symbol (not the dot)
 Answer: 554003
 
@@ -7,90 +9,116 @@ Part 2: Find the numeric values of which there are TWO adjacent to the * symbol
 Answer: 87263515
 """
 
+from typing import List, Tuple, Union
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> List[List[str]]:
+    """
+    Read the input file and return the grid as a list of character lists.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        List[List[str]]: 2D grid of characters.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
         return [list(line.strip()) for line in file]
 
 
-def check_value(y: int, x: int, grid: list) -> tuple[bool, set]:
-    """Search around a coordinate in the grid to see if we find a special symbol"""
-    asterisk_coor = ()
+def check_value(y: int, x: int, grid: List[List[str]]) -> Tuple[bool, Union[Tuple[int, int], tuple]]:
+    """
+    Check the 3x3 area around a coordinate for any symbol other than a digit or a dot.
+    If a '*' is found, its coordinates are returned separately.
+
+    Args:
+        y (int): Y-coordinate in the grid.
+        x (int): X-coordinate in the grid.
+        grid (List[List[str]]): The character grid.
+
+    Returns:
+        Tuple[bool, Tuple[int, int] or empty tuple]: 
+            - True if a symbol is found near the coordinate.
+            - Coordinate of '*' if found, else empty tuple.
+    """
+    asterisk_coord = ()
     for y_offset in range(-1, 2):
         for x_offset in range(-1, 2):
-            # Search in a 3x3 grid around the coordinate for a symbol.
-            if y + y_offset > len(grid) - 1 or y + y_offset < 0 or x + x_offset > len(grid[0]) - 1 or x + x_offset < 0:
-                continue
+            new_y, new_x = y + y_offset, x + x_offset
 
-            val = grid[y + y_offset][x + x_offset]
-            if not val.isdigit() and not val == '.':
-                # Add the coordinate of the asterisk in the return value.
-                if val == "*":
-                    asterisk_coor = (y + y_offset, x + x_offset)
+            # Ensure coordinates are within bounds
+            if 0 <= new_y < len(grid) and 0 <= new_x < len(grid[0]):
+                val = grid[new_y][new_x]
+                if not val.isdigit() and val != '.':
+                    if val == "*":
+                        asterisk_coord = (new_y, new_x)
+                    return True, (new_y, new_x)
 
-                return True, (y + y_offset, x + x_offset)
-    return False, asterisk_coor
-
-
-@profiler
-def part_1(grid: list) -> int:
-    """Find the full number with its coordinates then check for each coordinate whether its adjacent to an asterisk"""
-    number_coords = []
-    n = 0
-    for y, line in enumerate(grid):
-        sublst = []
-        for x, val in enumerate(line):
-            # We want to locate the full number with its coordinates in the grid so we can loop over the coordinates later.
-            if val.isdigit():
-                sublst.append([str(val), (y, x)])
-
-                # Add number and coords to list when a non numeric value was found.
-                if x == len(line) - 1 or not line[x + 1].isdigit():
-                    num = int(''.join([item[0] for item in sublst]))
-                    coords = [item[1] for item in sublst]
-                    number_coords.append((num, coords))
-                    sublst = []
-
-    # Check how many full numbers are not adjacent to an asterisk
-    for num, coords in number_coords:
-        for coor in coords:
-            valid = check_value(coor[0], coor[1], grid)
-            if valid[0]:
-                n += num
-                break
-
-    return n, number_coords
+    return False, asterisk_coord
 
 
 @profiler
-def part_2(lst: list, grid: list) -> int:
+def part_1(grid: List[List[str]]) -> Tuple[int, List[Tuple[int, List[Tuple[int, int]]]]]:
     """
-    Find all gears (* symbol) in the grid and find the gear ratio. 
-    That is if there are exactly two numbers adjacent to a gear then multiply them together
+    Locate all numbers in the grid and sum those that are adjacent to any symbol (excluding dots).
+
+    Args:
+        grid (List[List[str]]): 2D grid of characters.
+
+    Returns:
+        Tuple[int, List[Tuple[int, List[Tuple[int, int]]]]]: 
+            - Total sum of valid numbers.
+            - List of all numbers with their coordinates for reuse in part 2.
+    """
+    number_coords = []
+    total = 0
+
+    for y, line in enumerate(grid):
+        temp = []
+        for x, val in enumerate(line):
+            if val.isdigit():
+                temp.append([val, (y, x)])
+                if x == len(line) - 1 or not line[x + 1].isdigit():
+                    num = int(''.join([item[0] for item in temp]))
+                    coords = [item[1] for item in temp]
+                    number_coords.append((num, coords))
+                    temp = []
+
+    # Check adjacency to any symbol
+    for num, coords in number_coords:
+        if any(check_value(y, x, grid)[0] for y, x in coords):
+            total += num
+
+    return total, number_coords
+
+
+@profiler
+def part_2(number_coords: List[Tuple[int, List[Tuple[int, int]]]], grid: List[List[str]]) -> int:
+    """
+    Compute the gear ratio by finding '*' symbols adjacent to exactly two numbers,
+    then multiply those numbers together and sum the results.
+
+    Args:
+        number_coords (List[Tuple[int, List[Tuple[int, int]]]]): List of numbers and their coordinates from part 1.
+        grid (List[List[str]]): The character grid.
+
+    Returns:
+        int: Total gear ratio from all valid '*' gears.
     """
     gear_ratio = 0
     asterisks = {}
-    for num, coords in lst:
-        for coor in coords:
-            valid = check_value(coor[0], coor[1], grid)
-            # See if number is adjacent to asterisk
-            if valid[1]:
-                if valid[1] not in asterisks:
-                    # Add new asterisk coordinate
-                    asterisks.update({valid[1] : [num]})
-                else:
-                    # Add number coordinate to existing asterisk.
-                    asterisks[valid[1]].append(num)
-            if valid[0]:
-                break
 
-    # For all asterisks with two adjacent numeric values add the product of the two numbers.
-    for _, value in asterisks.items():
-        if len(value) == 2:
-            gear_ratio += (value[0] * value[1])
+    for num, coords in number_coords:
+        for y, x in coords:
+            _, asterisk = check_value(y, x, grid)
+            if asterisk:
+                asterisks.setdefault(asterisk, []).append(num)
+                break # Avoid double-counting this number
+
+    for nums in asterisks.values():
+        if len(nums) == 2:
+            gear_ratio += nums[0] * nums[1]
 
     return gear_ratio
 
@@ -98,7 +126,7 @@ def part_2(lst: list, grid: list) -> int:
 if __name__ == "__main__":
     input_data = get_input("inputs/3_input.txt")
 
-    total, coordinate_lst = part_1(input_data)
+    total_nums, coordinate_lst = part_1(input_data)
 
-    print(f"Part 1: {total}")
+    print(f"Part 1: {total_nums}")
     print(f"Part 2: {part_2(coordinate_lst, input_data)}")

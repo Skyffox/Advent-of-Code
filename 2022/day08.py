@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
 """
+Day 8: Treetop Tree House
+
 Part 1: How many trees are visible from outside the grid?
 Answer: 1533
 
@@ -10,82 +12,115 @@ Answer: 345744
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> list[list[int]]:
+    """
+    Reads the input file and converts it into a 2D list of integers representing tree heights.
+
+    Each line in the input file corresponds to a row in the grid, and each character in a line 
+    represents the height of a tree at that position.
+
+    Args:
+        file_path (str): The path to the input file containing the tree heights.
+
+    Returns:
+        list[list[int]]: A 2D list of integers where each element represents the height of a tree 
+                         in the grid at that position.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
-        return [list(line.strip()) for line in file]
+        return [[int(ch) for ch in line.strip()] for line in file]
 
 
 @profiler
-def part_1(forrest: list) -> int:
+def part_1(forest: list[list[int]]) -> int:
     """
-    Check for every position in the grid (a tree) whether all of the other trees between it and an edge of the grid are shorter than it. 
-    Then it is visible. This only has to be true for one side not all of them.
+    Determines how many trees are visible from the outside of the grid. A tree is considered visible 
+    if there are no taller or equal-height trees between it and the edge of the grid in any of the 
+    four directions (left, right, top, bottom).
+
+    Args:
+        forest (list[list[int]]): A 2D list representing the grid of trees, where each element is 
+                                  the height of a tree.
+
+    Returns:
+        int: The number of trees that are visible from outside the grid.
     """
-    visible_trees = len(forrest) * 2 + len(forrest[0]) * 2 - 4
-    # Part 1
-    for y in range(1, len(forrest) - 1):
-        for x in range(1, len(forrest) - 1):
-            # Left
-            if all(forrest[y][x] > forrest[y][a] for a in range(x)):
-                visible_trees += 1
-                continue
+    height = len(forest)
+    width = len(forest[0])
+    visible = 0
 
-            # Right
-            if all(forrest[y][x] > forrest[y][a] for a in range(x + 1, len(forrest[0]))):
-                visible_trees += 1
-                continue
+    # Iterate through each tree in the grid
+    for y in range(height):
+        for x in range(width):
+            current = forest[y][x]
 
-            # Top
-            if all(forrest[y][x] > forrest[a][x] for a in range(y)):
-                visible_trees += 1
-                continue
+            # Check if the tree is visible from any direction
+            if (
+                all(forest[y][a] < current for a in range(x)) or                        # left
+                all(forest[y][a] < current for a in range(x + 1, width)) or             # right
+                all(forest[a][x] < current for a in range(y)) or                        # top
+                all(forest[a][x] < current for a in range(y + 1, height))               # bottom
+            ):
+                visible += 1
 
-            # Bottom
-            if all(forrest[y][x] > forrest[a][x] for a in range(y + 1, len(forrest))):
-                visible_trees += 1
-                continue
-
-    return visible_trees
+    return visible
 
 
 @profiler
-def part_2(forrest: list) -> int:
-    """The elves want to build a treehouse and we need to calculate from what position we can see the most trees"""
-    scenic_score = 0
-    for y in range(1, len(forrest) - 1):
-        for x in range(1, len(forrest) - 1):
-            # Left
-            score_left = 0
-            for a in range(x-1, -1, -1):
-                score_left += 1
-                if forrest[y][x] <= forrest[y][a]:
+def part_2(forest: list[list[int]]) -> int:
+    """
+    Computes the highest scenic score possible for any tree in the grid. The scenic score of a tree 
+    is calculated by multiplying the viewing distances in all four directions (left, right, up, down).
+    The viewing distance in a direction is the number of trees that can be seen until a taller or equally 
+    tall tree blocks the view.
+
+    Args:
+        forest (list[list[int]]): A 2D list representing the grid of trees, where each element is 
+                                  the height of a tree.
+
+    Returns:
+        int: The highest scenic score among all trees in the grid.
+    """
+    height = len(forest)
+    width = len(forest[0])
+    best_score = 0
+
+    # Iterate through each tree in the grid
+    for y in range(height):
+        for x in range(width):
+            current = forest[y][x]
+
+            # Calculate the viewing distances in all four directions
+            left = right = up = down = 0
+
+            # Check left viewing distance
+            for dx in range(x - 1, -1, -1):
+                left += 1
+                if forest[y][dx] >= current:
                     break
 
-            # Right
-            score_right = 0
-            for a in range(x+1, len(forrest[0])):
-                score_right += 1
-                if forrest[y][x] <= forrest[y][a]:
+            # Check right viewing distance
+            for dx in range(x + 1, width):
+                right += 1
+                if forest[y][dx] >= current:
                     break
 
-            # Top
-            score_top = 0
-            for a in range(y-1, -1, -1):
-                score_top += 1
-                if forrest[y][x] <= forrest[a][x]:
+            # Check up viewing distance
+            for dy in range(y - 1, -1, -1):
+                up += 1
+                if forest[dy][x] >= current:
                     break
 
-            # Bottom
-            score_bottom = 0
-            for a in range(y+1, len(forrest)):
-                score_bottom += 1
-                if forrest[y][x] <= forrest[a][x]:
+            # Check down viewing distance
+            for dy in range(y + 1, height):
+                down += 1
+                if forest[dy][x] >= current:
                     break
 
-            scenic_score = max(scenic_score, score_left * score_right * score_top * score_bottom)
+            # Calculate the scenic score and update the best score if it's higher
+            score = left * right * up * down
+            best_score = max(best_score, score)
 
-    return scenic_score
+    return best_score
 
 
 if __name__ == "__main__":

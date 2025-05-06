@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
 """
+Day 6: Guard Gallivant
+
 Part 1: Find out how many distinct tiles the guard visits
 Answer: 5030
 
@@ -7,100 +9,144 @@ Part 2: If we could place an obstacle in any position in the grid how many times
 Answer: 1928 (takes ~16 seconds)
 """
 
+from typing import List, Tuple, Optional
 from utils import profiler
 
 
 def within_grid(x: int, y: int, x_limit: int, y_limit: int) -> bool:
-    """Check whether we still are in the grid"""
+    """
+    Check whether a coordinate is within the grid boundaries.
+
+    Args:
+        x (int): X coordinate.
+        y (int): Y coordinate.
+        x_limit (int): Maximum X boundary.
+        y_limit (int): Maximum Y boundary.
+
+    Returns:
+        bool: True if (x, y) is within grid, False otherwise.
+    """
     return 0 <= x < x_limit and 0 <= y < y_limit
 
 
-def patrol(grid: list, pos: tuple[int, int]) -> tuple[bool, list]:
+def patrol(grid: List[List[str]], pos: Tuple[int, int]) -> Tuple[bool, Optional[List[Tuple[int, int]]]]:
     """
-    Apply the rules on how the guard moves through the grid. We always go forward until we hit an object
-    then we turn right and continue onward
+    Simulate guard movement on the grid. Move forward until hitting an obstacle,
+    at which point the guard turns right. Track visited positions and detect loops.
+
+    Args:
+        grid (List[List[str]]): The grid map.
+        pos (Tuple[int, int]): Starting position of the guard.
+
+    Returns:
+        Tuple[bool, Optional[List[Tuple[int, int]]]]:
+            - True and visited tiles list if the guard exits the grid.
+            - False and None if the guard enters an infinite loop.
     """
-    # All possible direction we can move: N, E, S, W
-    directions = ((0, -1), (1, 0), (0, 1), (-1, 0))
-    idx = 0
+    directions = ((0, -1), (1, 0), (0, 1), (-1, 0))  # N, E, S, W
+    direction_idx = 0
     x_limit = len(grid[0])
     y_limit = len(grid)
 
-    # A dictionary that saves the positions we have been, and which direction we faced when we entered the position
-    visited = {pos: [idx]}
+    visited: dict[Tuple[int, int], List[int]] = {pos: [direction_idx]}
 
     while True:
-        # Step to the next position
-        next_pos = (pos[0] + directions[idx][0], pos[1] + directions[idx][1])
+        next_x = pos[0] + directions[direction_idx][0]
+        next_y = pos[1] + directions[direction_idx][1]
+        next_pos = (next_x, next_y)
 
-        # We have left the grid, also return the keys to show which tiles we have visited
-        if not within_grid(next_pos[0], next_pos[1], x_limit, y_limit):
+        if not within_grid(next_x, next_y, x_limit, y_limit):
             return True, list(visited.keys())
 
-        # Turn right based on the directions variable
-        if grid[next_pos[1]][next_pos[0]] == "#":
-            idx = (idx + 1) % 4
+        if grid[next_y][next_x] == "#":
+            direction_idx = (direction_idx + 1) % 4
         else:
-            # Check if we visited the position before and if we were in the same direction
-            # that means we have entered a loop. Otherwise add the direction to the tile in our dictionary
             if next_pos in visited:
-                if idx in visited[next_pos]:
+                if direction_idx in visited[next_pos]:
                     return False, None
-                visited.update({next_pos: visited[next_pos] + [idx]})
+                visited[next_pos].append(direction_idx)
             else:
-                visited[next_pos] = [idx]
-
+                visited[next_pos] = [direction_idx]
             pos = next_pos
 
 
-def get_input(file_path: str) -> tuple[list, tuple[int, int]]:
-    """Get the input data"""
-    grid = []
+def get_input(file_path: str) -> Tuple[List[List[str]], Tuple[int, int]]:
+    """
+    Read the grid and starting position from the input file.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        Tuple[List[List[str]], Tuple[int, int]]: The grid and starting position.
+    """
+    grid: List[List[str]] = []
     start_pos = (0, 0)
     with open(file_path, "r", encoding="utf-8") as file:
-        for idx, line in enumerate(file):
-            grid.append(list(line.strip()))
-            if "^" in line:
-                start_pos = (line.index("^"), idx)
-
+        for row_idx, line in enumerate(file):
+            stripped = line.strip()
+            grid.append(list(stripped))
+            if "^" in stripped:
+                start_pos = (stripped.index("^"), row_idx)
     return grid, start_pos
 
 
 @profiler
-def part_1(grid: list, start_pos: tuple[int, int]):
-    """Get the tiles the guard visited"""
+def part_1(grid: List[List[str]], start_pos: Tuple[int, int]) -> int:
+    """
+    Count how many distinct tiles the guard visits before exiting.
+
+    Args:
+        grid (List[List[str]]): The grid map.
+        start_pos (Tuple[int, int]): Starting position of the guard.
+
+    Returns:
+        int: Number of unique tiles visited.
+    """
     _, visited = patrol(grid, start_pos)
-    return len(visited)
+    return len(visited) if visited else 0
 
 
 @profiler
-def part_2(grid: list, start_pos: tuple[int, int]) -> int:
-    """Count how many times we can enter a loop if we place an object in the grid"""
+def part_2(grid: List[List[str]], start_pos: Tuple[int, int]) -> int:
+    """
+    Try placing an obstacle on each tile visited in part 1 to see
+    how many placements cause an infinite loop.
+
+    Args:
+        grid (List[List[str]]): The grid map.
+        start_pos (Tuple[int, int]): Starting position of the guard.
+
+    Returns:
+        int: Number of obstacle placements that cause a loop.
+    """
     loops_count = 0
-    # Get all the tiles the guard visited
     _, visited = patrol(grid, start_pos)
 
-    # Do not count the position the guard starts
-    visited.remove(start_pos)
+    if not visited:
+        return 0
+
     # We don't have to test every empty space, just the visited ones
     # because the obstruction must be on the visited path
     for x, y in visited:
-        # Add an obstacle
+        if (x, y) == start_pos:
+            continue
+
+        # Temporarily place an obstacle
+        original = grid[y][x]
         grid[y][x] = "#"
 
         has_left, _ = patrol(grid, start_pos)
-        # Means we ended up in a loop
         if not has_left:
             loops_count += 1
 
-        # Remove the obstacle again
-        grid[y][x] = "."
+        # Restore the grid
+        grid[y][x] = original
 
     return loops_count
 
 
 if __name__ == "__main__":
-    # Get input data
     input_data, start = get_input("inputs/6_input.txt")
 
     print(f"Part 1: {part_1(input_data, start)}")

@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
 """
+Day 12: Garden Groups
+
 Part 1: What is the total price of fencing all regions on your map?
 Answer: 1400386
 
@@ -7,22 +9,51 @@ Part 2: What is the new total price of fencing all regions on your map?
 Answer: 851994
 """
 
+from typing import List, Tuple
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> List[List[str]]:
+    """
+    Read the garden map from a file and convert it into a 2D list.
+    Each character represents a tile in the garden.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        list[list[str]]: 2D list representing the garden layout.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
         return [list(line.strip()) for line in file]
 
 
-def is_valid(x: int, y: int, grid: list) -> bool:
-    """Check if a cell is within bounds of the grid"""
+def is_valid(x: int, y: int, grid: List[List[str]]) -> bool:
+    """
+    Check whether a cell is within bounds of the grid.
+
+    Args:
+        x (int): Row index.
+        y (int): Column index.
+        grid (list): The 2D grid.
+
+    Returns:
+        bool: True if the position is within bounds, False otherwise.
+    """
     return 0 <= x < len(grid) and 0 <= y < len(grid[0])
 
 
-def dfs(x: int, y: int, grid: list, visited: list, current_group: list) -> list:
-    """Depth-First Search function to find connected letters that are the same"""
+def dfs(x: int, y: int, grid: List[List[str]], visited: List[List[bool]], current_group: List[Tuple[int, int]]) -> None:
+    """
+    Depth-First Search function to find connected letters that are the same.
+
+    Args:
+        x (int): Starting row index.
+        y (int): Starting column index.
+        grid (list): The 2D grid of characters.
+        visited (list): Boolean matrix tracking visited cells.
+        current_group (list): Accumulator list of positions in the current group.
+    """
     # Define the directions for traversal (right, left, down, up)
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
@@ -38,8 +69,16 @@ def dfs(x: int, y: int, grid: list, visited: list, current_group: list) -> list:
             dfs(nx, ny, grid, visited, current_group)
 
 
-def find_groups(grid: list) -> list:
-    """Find groups of the same letter"""
+def find_groups(grid: List[List[str]]) -> List[List[Tuple[int, int]]]:
+    """
+    Find groups of the same letter in the grid.
+
+    Args:
+        grid (list): 2D grid of garden tile types.
+
+    Returns:
+        list: List of groups, each a list of (x, y) tile coordinates.
+    """
     visited = [[False for _ in range(len(grid[0]))] for _ in range(len(grid))]
     groups = []
 
@@ -54,8 +93,17 @@ def find_groups(grid: list) -> list:
     return groups
 
 
-def find_consecutive_positions(positions: list, check_vertical=False) -> list:
-    """Find sequences of the same value for a given coordinate"""
+def find_consecutive_positions(positions: List[Tuple[int, int]], check_vertical: bool = False) -> List[List[Tuple[int, int]]]:
+    """
+    Find sequences of the same value for a given coordinate.
+
+    Args:
+        positions (list): List of (x, y) coordinates.
+        check_vertical (bool): If True, checks vertical alignment. Default is horizontal.
+
+    Returns:
+        list: Groups of consecutive aligned coordinates.
+    """
     # Sort the positions first by x-coordinate (row) and then by y-coordinate (column)
     sorted_positions = sorted(positions)
     x, y = 0, 1
@@ -86,8 +134,17 @@ def find_consecutive_positions(positions: list, check_vertical=False) -> list:
 
 
 @profiler
-def part_one(grid: list) -> int:
-    """Find the parameter of all the groups in the grid, so the elves know how much metres of fence to buy"""
+def part_one(grid: List[List[str]]) -> int:
+    """
+    Find the perimeter of all the groups in the grid, 
+    so the elves know how many metres of fence to buy.
+
+    Args:
+        grid (list): 2D grid representing the garden layout.
+
+    Returns:
+        int: Total perimeter cost (tiles * sides).
+    """
     groups = find_groups(grid)
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
@@ -112,8 +169,16 @@ def part_one(grid: list) -> int:
 
 
 @profiler
-def part_two(grid: list) -> int:
-    """Instead of counting tiles we now need to count the unique amount of sides for an area"""
+def part_two(grid: List[List[str]]) -> int:
+    """
+    Instead of counting tiles we now need to count the unique amount of sides for an area.
+
+    Args:
+        grid (list): 2D grid representing the garden layout.
+
+    Returns:
+        int: Total cost of fencing unique sides for all regions.
+    """
     groups = find_groups(grid)
     directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
@@ -136,7 +201,7 @@ def part_two(grid: list) -> int:
                     number = grid[y][x]
                     for dx, dy in directions:
                         nx, ny = x + dx, y + dy
-                        valid = is_valid(nx, ny, grid)
+                        valid = is_valid(ny, nx, grid)
                         # Add a fence when our number from the current position is different from our original
                         # We may place fences outside the grid because we place them in positions around the current position
                         if (valid and grid[ny][nx] != number) or not valid:
@@ -155,9 +220,9 @@ def part_two(grid: list) -> int:
                     number = grid[y][x]
                     for dx, dy in directions:
                         nx, ny = x + dx, y + dy
-                        valid = is_valid(nx, ny, grid)
+                        valid = is_valid(ny, nx, grid)
                         # Add a fence when our number from the current position is different from our original
-                        # We may play fences outside the grid because we place them in positions around the current position
+                        # We may place fences outside the grid because we place them in positions around the current position
                         if (valid and grid[ny][nx] != number) or not valid:
                             visited_fences.append((ny, nx))
 
@@ -185,7 +250,6 @@ def part_two(grid: list) -> int:
 
 
 if __name__ == "__main__":
-    # Get input data
     input_data = get_input("inputs/12_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")

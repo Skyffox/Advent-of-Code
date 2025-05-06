@@ -1,78 +1,130 @@
 # pylint: disable=line-too-long
 """
-Part 1: Traverse a keypad to punch a specific code
+Day 2: Bathroom Security
+
+Part 1: Traverse a keypad to punch a specific code  
 Answer: 56855
 
-Part 2: The keypad is different but still same thing
+Part 2: The keypad is different but still same thing as part 1
 Answer: B3C27
 """
 
+from typing import List, Dict,Tuple
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> List[List[str]]:
+    """
+    Parses the input file into a List of instruction lines.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        List[List[str]]: A list of lists of directional instructions.
+    """
     instructions = []
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
             instructions.append(list(line.strip()))
-
     return instructions
 
 
-def dict_value(my_dict: dict, pos: tuple[int, int]) -> str:
-    """Bit dumb, find our keygrid position in the values and get back the key"""
-    return list(my_dict.keys())[list(my_dict.values()).index(pos)]
+def get_key_by_position(keypad: Dict[str, Tuple[int, int]], position: Tuple[int, int]) -> str:
+    """
+    Returns the keypad key corresponding to a given position.
+
+    Args:
+        keypad (Dict): Mapping of keys to (x, y) positions.
+        position (Tuple[int, int]): Current position on the keypad.
+
+    Returns:
+        str: The key at the specified position.
+    """
+    for key, pos in keypad.items():
+        if pos == position:
+            return key
+    raise ValueError(f"Position {position} not found on keypad.")
 
 
-def move(instruction: str, moves: list, pos: tuple[int, int]) -> tuple[int, int]:
-    """Make a move in the grid based on current options"""
-    if instruction not in moves:
-        return pos
-    elif instruction == "U":
-        pos[1] -= 1
-    elif instruction == "L":
-        pos[0] -= 1
-    elif instruction == "R":
-        pos[0] += 1
-    elif instruction == "D":
-        pos[1] += 1
+def move(direction: str, allowed_moves: list[str], position: Tuple[int, int]) -> Tuple[int, int]:
+    """
+    Moves the current position based on the direction, if allowed.
 
-    return pos
+    Args:
+        direction (str): Direction to move ('U', 'D', 'L', 'R').
+        allowed_moves (list[str]): Valid directions from current key.
+        position (Tuple[int, int]): Current (x, y) position.
+
+    Returns:
+        Tuple[int, int]: New (x, y) position after movement.
+    """
+    x, y = position
+    if direction not in allowed_moves:
+        return position
+    if direction == "U":
+        y -= 1
+    elif direction == "D":
+        y += 1
+    elif direction == "L":
+        x -= 1
+    elif direction == "R":
+        x += 1
+    return (x, y)
 
 
 @profiler
-def execute_instructions(instructions: list, keypad: dict, movement: dict) -> str:
-    """Execute a set of instructions based on certain movement options we can do"""
-    keylock = []
-    pos = [2, 2]
+def execute_instructions(instructions: List[List[str]], keypad: Dict[str, Tuple[int, int]], movement: Dict[str, List[str]]) -> str:
+    """
+    Executes a sequence of movement instructions on a keypad.
 
-    for instruction in instructions:
-        for i in instruction:
-            # Get the current position on the grid
-            number = dict_value(keypad, pos)
-            pos = move(i, movement[number], pos)
+    Args:
+        instructions (List[List[str]]): List of instruction sequences.
+        keypad (dict): Keypad layout mapping keys to positions.
+        movement (dict): Allowed moves from each key.
 
-        keylock.append(dict_value(keypad, pos))
+    Returns:
+        str: Final bathroom code.
+    """
+    code = []
+    position = (2, 2)  # Starting at '5' for both keypads
 
-    # Make a list of strings to a single number
-    return ''.join(map(str, keylock))
+    for sequence in instructions:
+        for direction in sequence:
+            current_key = get_key_by_position(keypad, position)
+            position = move(direction, movement[current_key], position)
+        code.append(get_key_by_position(keypad, position))
+
+    return ''.join(code)
 
 
 if __name__ == "__main__":
-    instr = get_input("inputs/2_input.txt")
+    input_data = get_input("inputs/2_input.txt")
 
-    # Translate positions on the grid back to a number for the keypad
-    keypad_part_1 = {"1":[1,1], "2":[2,1], "3":[3,1], "4":[1,2], "5":[2,2], "6":[3,2], "7":[1,3], "8":[2,3], "9":[3,3]}
-    keypad_part_2 = {"1":[3,1], "2":[2,2], "3":[3,2], "4":[4,2], "5":[1,3], "6":[2,3], "7":[3,3], "8":[4,3], "9":[5,3],
-                     "A":[2,4], "B":[3,4], "C":[4,4], "D":[3,5]}
+    keypad_part_1 = {
+        "1": (1, 1), "2": (2, 1), "3": (3, 1),
+        "4": (1, 2), "5": (2, 2), "6": (3, 2),
+        "7": (1, 3), "8": (2, 3), "9": (3, 3),
+    }
 
-    # Possible movement options for each position on the grid
-    movement_part_1 = {"1":["D", "R"], "2":["L", "R", "D"], "3":["L", "D"], "4":["U", "R", "D"], "5":["U", "D", "L", "R"],
-                       "6":["U", "L", "D"], "7":["U", "R"], "8":["U", "L", "R"], "9":["U", "L"]}
-    movement_part_2 = {"1":["D"], "2":["R", "D"], "3":["U", "D", "L", "R"], "4":["L", "D"], "5":["R"],
-                       "6":["U", "D", "L", "R"], "7":["U", "D", "L", "R"], "8":["U", "D", "L", "R"], "9":["L"], 
-                       "A":["U", "R"], "B":["U", "D", "L", "R"], "C":["L", "U"], "D":["U"]}
+    keypad_part_2 = {
+        "1": (3, 1), "2": (2, 2), "3": (3, 2), "4": (4, 2),
+        "5": (1, 3), "6": (2, 3), "7": (3, 3), "8": (4, 3), "9": (5, 3),
+        "A": (2, 4), "B": (3, 4), "C": (4, 4), "D": (3, 5),
+    }
 
-    print(f"Part 1: {execute_instructions(instr, keypad_part_1, movement_part_1)}")
-    print(f"Part 2: {execute_instructions(instr, keypad_part_2, movement_part_2)}")
+    movement_part_1 = {
+        "1": ["D", "R"], "2": ["L", "D", "R"], "3": ["L", "D"],
+        "4": ["U", "D", "R"], "5": ["U", "D", "L", "R"], "6": ["U", "D", "L"],
+        "7": ["U", "R"], "8": ["U", "L", "R"], "9": ["U", "L"]
+    }
+
+    movement_part_2 = {
+        "1": ["D"], "2": ["D", "R"], "3": ["L", "R", "U", "D"], "4": ["L", "D"],
+        "5": ["R"], "6": ["U", "D", "L", "R"], "7": ["U", "D", "L", "R"],
+        "8": ["U", "D", "L", "R"], "9": ["L"], "A": ["U", "R"],
+        "B": ["U", "D", "L", "R"], "C": ["U", "L"], "D": ["U"]
+    }
+
+    print(f"Part 1: {execute_instructions(input_data, keypad_part_1, movement_part_1)}")
+    print(f"Part 2: {execute_instructions(input_data, keypad_part_2, movement_part_2)}")

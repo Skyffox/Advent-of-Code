@@ -1,38 +1,71 @@
 # pylint: disable=line-too-long
 """
-Part 1: Find two numbers in the input that add together to 2020
+Day 1: Report Repair
+
+Part 1: Find the two entries in the input list that sum to 2020 and return their product.
 Answer: 445536
 
-Part 2: Now do the same but for 3 numbers
+Part 2: Find three entries in the input list that sum to 2020 and return their product.
 Answer: 138688160
 """
 
+from typing import List
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> List[int]:
+    """
+    Read the input file and parse it into a list of integers.
+
+    Args:
+        file_path (str): Path to the input file.
+
+    Returns:
+        List[int]: List of expense report numbers.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
         return [int(line.strip()) for line in file]
 
 
 @profiler
-def part_1(lst: list) -> int:
-    """Find 2 numbers that add up to 2020"""
-    for idx, x in enumerate(lst):
-        for y in lst[idx+1:]:
-            if x + y == 2020:
-                return x * y
+def part_1(entries: List[int]) -> int:
+    """
+    Find two numbers in the list that add up to 2020 and return their product.
+
+    Args:
+        entries (List[int]): List of numbers from the input.
+
+    Returns:
+        int: The product of the two numbers that sum to 2020.
+    """
+    seen = set()
+    for num in entries:
+        complement = 2020 - num
+        if complement in seen:
+            return num * complement
+        seen.add(num)
+    return -1 # Should not happen if input is valid
 
 
 @profiler
-def part_2(lst: list) -> int:
-    """Find 3 numbers that add up to 2020"""
-    for idx, x in enumerate(lst):
-        for y in lst[idx+1:]:
-            for z in lst[idx+1:]:
-                if x + y + z == 2020:
-                    return x * y * z
+def part_2(entries: List[int]) -> int:
+    """
+    Find three numbers in the list that add up to 2020 and return their product.
+
+    Args:
+        entries (List[int]): List of numbers from the input.
+
+    Returns:
+        int: The product of the three numbers that sum to 2020.
+    """
+    entries_len = len(entries)
+    for i in range(entries_len):
+        for j in range(i + 1, entries_len):
+            a, b = entries[i], entries[j]
+            complement = 2020 - a - b
+            if complement in entries[j + 1:]:
+                return a * b * complement
+    return -1 # Should not happen if input is valid
 
 
 if __name__ == "__main__":

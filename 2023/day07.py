@@ -1,18 +1,21 @@
 # pylint: disable=line-too-long
 """
-Part 1: Find the ranks of hands in a poker game. The answer is their bid multiplied by their rank
+Day 7: Camel Cards
+
+Part 1: Find the ranks of hands in a poker game. The answer is their bid multiplied by their rank.  
 Answer: 253205868
 
-Part 2: Same as part 1, but the Jack has become a Joker which transform into a card that makes the hand have the highest value possible
+Part 2: Same as part 1, but Jacks become Jokers and can act as any card to maximize hand value.  
 Answer: 253907829
 """
 
 from enum import Enum
+from typing import List, Tuple
 from utils import profiler
 
 
 class Hands(Enum):
-    """Assign values to each hand, higher is better"""
+    """Assign increasing numeric values to hand types (higher is better)."""
     HIGH_CARD = 0
     ONE_PAIR = 1
     TWO_PAIR = 2
@@ -22,19 +25,45 @@ class Hands(Enum):
     FIVE_KIND = 6
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> List[Tuple[str, str]]:
+    """
+    Read hand and bid data from file.
+
+    Args:
+        file_path (str): Path to input file.
+
+    Returns:
+        List[Tuple[str, str]]: List of (hand, bid) tuples.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
         return [line.strip().split(" ") for line in file]
 
 
-def find_duplicates(hand, t):
-    """Find any duplicates in a list with certain appearance rate"""
-    return [c for c in set(hand) if hand.count(c) > t]
+def find_duplicates(hand: List[int], threshold: int) -> List[int]:
+    """
+    Find values in the hand that appear more than `threshold` times.
+
+    Args:
+        hand (List[int]): The hand of cards (as ints).
+        threshold (int): Frequency threshold.
+
+    Returns:
+        List[int]: Duplicates exceeding the threshold.
+    """
+    return [c for c in set(hand) if hand.count(c) > threshold]
 
 
-def transform_hand(hand: list, is_part2: bool) -> list:
-    """Transform special cards to a normal or adjusted value"""
+def transform_hand(hand: List[str], is_part2: bool) -> List[int]:
+    """
+    Convert hand from character format to numerical format.
+
+    Args:
+        hand (List[str]): Card characters.
+        is_part2 (bool): If True, treat 'J' as Joker (lowest), otherwise as Jack (11).
+
+    Returns:
+        List[int]: Numeric representation of cards.
+    """
     for idx, i in enumerate(hand):
         if i == 'T':
             hand[idx] = 10
@@ -52,95 +81,86 @@ def transform_hand(hand: list, is_part2: bool) -> list:
     return hand
 
 
-def score(hand: list) -> list:
-    """Determine the rank of the hand"""
-    rank = 0
+def score(hand: List[int]) -> List:
+    """
+    Evaluate hand and return its rank and structure.
 
-    # High card.
-    if len(set(hand)) == len(hand):
-        rank = [Hands.HIGH_CARD.value, hand]
+    Args:
+        hand (List[int]): Numeric hand.
 
-    # One pair.
-    if len(set(hand)) == 4:
-        rank = [Hands.ONE_PAIR.value, hand]
-
-    if len(set(hand)) == 3:
-        # Two pair.
+    Returns:
+        List: [rank_value, hand]
+    """
+    unique = set(hand)
+    if len(unique) == 5:
+        return [Hands.HIGH_CARD.value, hand]
+    elif len(unique) == 4:
+        return [Hands.ONE_PAIR.value, hand]
+    elif len(unique) == 3:
         if len(find_duplicates(hand, 1)) == 2:
-            rank = [Hands.TWO_PAIR.value, hand]
-        # Three of a kind.
-        else:
-            rank = [Hands.THREE_KIND.value, hand]
-
-    if len(set(hand)) == 2:
-        # Four of a kind.
+            return [Hands.TWO_PAIR.value, hand]
+        return [Hands.THREE_KIND.value, hand]
+    elif len(unique) == 2:
         if len(find_duplicates(hand, 3)):
-            rank = [Hands.FOUR_KIND.value, hand]
-        # Full house.
-        else:
-            rank = [Hands.FULL_HOUSE.value, hand]
-
-    # Five of a kind.
-    if len(set(hand)) == 1:
-        rank = [Hands.FIVE_KIND.value, hand]
-
-    return rank
+            return [Hands.FOUR_KIND.value, hand]
+        return [Hands.FULL_HOUSE.value, hand]
+    return [Hands.FIVE_KIND.value, hand]
 
 
 @profiler
-def part_1(inp: list) -> int:
-    """Determine the total winnings from calculating the ranks of hands we have been dealt"""
-    lst = []
-    total = 0
+def part_1(inp: List[Tuple[str, str]]) -> int:
+    """
+    Calculate total winnings based on hand strength and rank.
 
-    # Group the value of the hand, the actual hand and the bid together
+    Args:
+        inp (List[Tuple[str, str]]): List of (hand, bid).
+
+    Returns:
+        int: Total winnings.
+    """
+    hands = []
     for hand, bid in inp:
-        rank = score(transform_hand(list(hand), False))
-        rank.append(int(bid))
-        lst.append(rank)
+        ranked = score(transform_hand(list(hand), False))
+        ranked.append(int(bid))
+        hands.append(ranked)
 
-    # Sort best ranks on the best value hand
-    sorted_ranks = sorted(lst, key=lambda x: (x[0], x[1]))
-    for idx, (_, _, bid) in enumerate(sorted_ranks):
-        # The total winnings of a set of hands are calculated by adding up the result of multiplying each hand's bid with its rank
-        total += (idx + 1) * bid
+    hands.sort(key=lambda x: (x[0], x[1]))
 
-    return total
+    return sum((i + 1) * bid for i, (_, _, bid) in enumerate(hands))
 
 
 @profiler
-def part_2(inp: list) -> int:
-    """t"""
-    lst = []
-    total = 0
+def part_2(inp: List[Tuple[str, str]]) -> int:
+    """
+    Same as part_1 but 'J' is now a Joker that becomes whatever gives the highest rank.
 
+    Args:
+        inp (List[Tuple[str, str]]): List of (hand, bid).
+
+    Returns:
+        int: Total winnings.
+    """
+    hands = []
     for hand, bid in inp:
-        # Find indices where we have a J and replace this with something that is higher.
         if "J" not in hand:
-            rank = score(transform_hand(list(hand), True))
+            ranked = score(transform_hand(list(hand), True))
         else:
-            joker_indices = [i for i, c in enumerate(hand) if c == "J"]
-            hand = transform_hand(list(hand), True)
-            best = [-1]
-            # Exhaustive search for highest score.
-            for x in range(2, 14):
-                new_hand = hand[:]
-                # Dont need to think of combinations of values for J to find the highest score.
-                for idx in joker_indices:
-                    new_hand[idx] = x
+            joker_idxs = [i for i, c in enumerate(hand) if c == "J"]
+            base_hand = transform_hand(list(hand), True)
+            best_rank = [-1]
+            for value in range(2, 14): # Try replacing Jokers with each possible value
+                trial = base_hand[:]
+                for idx in joker_idxs:
+                    trial[idx] = value
+                best_rank = max(score(trial), best_rank)
+            ranked = [best_rank[0], base_hand]
 
-                best = max(score(new_hand), best)
-            rank = [best[0], hand]
+        ranked.append(int(bid))
+        hands.append(ranked)
 
-        rank.append(int(bid))
-        lst.append(rank)
+    hands.sort(key=lambda x: (x[0], x[1]))
 
-    # Sort best ranks on the best value hand
-    sorted_ranks = sorted(lst, key=lambda x: (x[0], x[1]))
-    for idx, (_, _, bid) in enumerate(sorted_ranks):
-        total += (idx + 1) * bid
-
-    return total
+    return sum((i + 1) * bid for i, (_, _, bid) in enumerate(hands))
 
 
 if __name__ == "__main__":

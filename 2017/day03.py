@@ -1,9 +1,11 @@
 # pylint: disable=line-too-long
 """
-Part 1: A pattern that spirals and we need to find out how many steps we are removed from the center of it
+Day 3: Spiral Memory
+
+Part 1: Determine how many steps are required to move from a given square to square 1 in a spiral grid.  
 Answer: 552
 
-Part 2: What is the first value written that is larger than your puzzle input, if we assign values to each squares that make up the sum of its neighbours
+Part 2: Find the first value written in the spiral that is larger than the puzzle input, where each value is the sum of its adjacent values.  
 Answer: 330785
 """
 
@@ -13,26 +15,36 @@ PUZZLE_INPUT = 325489
 
 
 @profiler
-def part_1():
+def part_1() -> int:
     """
-    I noticed that the bottom right is always the square of an uneven number, so create enough of these
-    anchor points to see where our number is closest to then calculate the Manhattan distance back to 1.
+    Calculates the Manhattan distance from a given number in a spiral to the center (1).
+    The spiral expands in odd-length square layers (1x1, 3x3, 5x5, ...).
+
+    Returns:
+        int: The Manhattan distance to the center.
     """
     i = 1
     while i * i < PUZZLE_INPUT:
-        i += 2
+        i += 2 # Find the smallest odd square that contains the input
 
+    # Compute midpoints of each side in the current ring
     pivots = [i * i - k * (i - 1) for k in range(4)]
 
-    for p in pivots:
-        dist = abs(p - PUZZLE_INPUT)
-        if dist <= (i - 1) // 2:
-            return i - 1 - dist
+    for pivot in pivots:
+        distance = abs(pivot - PUZZLE_INPUT)
+        if distance <= (i - 1) // 2:
+            return i - 1 - distance
 
 
 @profiler
-def part_2():
-    """Recreate a line that circles around where each new value is the sum of its surroundings"""
+def part_2() -> int:
+    """
+    Constructs a spiral where each cell contains the sum of the values of adjacent cells.
+    Returns the first value written that is larger than the puzzle input.
+
+    Returns:
+        int: The first value in the spiral greater than PUZZLE_INPUT.
+    """
     # The list values contains all numbers that are already place and their respective coordinates: (x, y, value)
     values = [(0, 0, 1)]
 

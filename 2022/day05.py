@@ -1,5 +1,7 @@
 # pylint: disable=line-too-long
 """
+Day 5: Supply Stacks
+
 Part 1: After the rearrangement procedure completes, what crate ends up on top of each stack?
 Answer: DHBJQJCCW
 
@@ -8,50 +10,86 @@ Answer: WJVRLSJJT
 """
 
 from copy import deepcopy
+from typing import List
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
-    """Get the input data"""
+def get_input(file_path: str) -> List[str]:
+    """
+    Read input lines from file.
+
+    Args:
+        file_path (str): Path to input file.
+
+    Returns:
+        List[str]: Lines from the file.
+    """
     with open(file_path, "r", encoding="utf-8") as file:
         return file.readlines()
 
 
-@profiler
-def part_1(lines: list, stacks: list) -> str:
-    """a"""
-    for line in lines:
-        line = list(line.strip().split(" "))
+def parse_move_instruction(line: str) -> tuple[int, int, int]:
+    """
+    Extract number of crates to move, source stack index, and destination stack index.
 
-        if line[0] == "move":
-            move = [int(x) for x in line if x.isdigit()]
+    Args:
+        line (str): Instruction line.
 
-            for _ in range(move[0]):
-                crate = stacks[move[1] - 1].pop()
-                stacks[move[2] - 1].append(crate)
-
-    return "".join([s.pop() for s in stacks])
+    Returns:
+        tuple[int, int, int]: (count, from_stack, to_stack)
+    """
+    parts = [int(x) for x in line.strip().split() if x.isdigit()]
+    return parts[0], parts[1] - 1, parts[2] - 1  # adjust to 0-based index
 
 
 @profiler
-def part_2(lines: list, stacks: list) -> str:
-    """A"""
-    for line in lines:
-        line = list(line.strip().split(" "))
+def part_1(instructions: List[str], stacks: List[List[str]]) -> str:
+    """
+    Simulate crate moves one-by-one (reversing order when moving multiple crates).
 
-        if line[0] == "move":
-            move = [int(x) for x in line if x.isdigit()]
-            stacks[move[2] - 1] += stacks[move[1] - 1][-move[0]:]
-            for _ in range(move[0]):
-                stacks[move[1] - 1].pop()
+    Args:
+        instructions (List[str]): Move instructions.
+        stacks (List[List[str]]): Initial crate stacks.
 
-    return "".join([s.pop() for s in stacks])
+    Returns:
+        str: Top crate of each stack after rearrangement.
+    """
+    for line in instructions:
+        if line.startswith("move"):
+            count, from_idx, to_idx = parse_move_instruction(line)
+            for _ in range(count):
+                crate = stacks[from_idx].pop()
+                stacks[to_idx].append(crate)
+
+    return "".join(stack[-1] for stack in stacks)
+
+
+@profiler
+def part_2(instructions: List[str], stacks: List[List[str]]) -> str:
+    """
+    Simulate crate moves in bulk, preserving their original order.
+
+    Args:
+        instructions (List[str]): Move instructions.
+        stacks (List[List[str]]): Initial crate stacks.
+
+    Returns:
+        str: Top crate of each stack after rearrangement.
+    """
+    for line in instructions:
+        if line.startswith("move"):
+            count, from_idx, to_idx = parse_move_instruction(line)
+            crates_to_move = stacks[from_idx][-count:]
+            stacks[to_idx].extend(crates_to_move)
+            stacks[from_idx] = stacks[from_idx][:-count]
+
+    return "".join(stack[-1] for stack in stacks)
 
 
 if __name__ == "__main__":
     input_data = get_input("inputs/5_input.txt")
 
-    stack = [
+    initial_stacks = [
         ["F", "C", "P", "G", "Q", "R"],
         ["W", "T", "C", "P"],
         ["B", "H", "P", "M", "C"],
@@ -63,5 +101,5 @@ if __name__ == "__main__":
         ["G", "V", "Z", "Q", "H", "T", "C", "W"]
     ]
 
-    print(f"Part 1: {part_1(input_data, deepcopy(stack))}")
-    print(f"Part 2: {part_2(input_data, stack)}")
+    print(f"Part 1: {part_1(input_data, deepcopy(initial_stacks))}")
+    print(f"Part 2: {part_2(input_data, deepcopy(initial_stacks))}")
