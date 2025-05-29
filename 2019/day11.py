@@ -174,8 +174,8 @@ def part_two(data_input: List[Tuple[int, int, int]]) -> None:
 
 
 if __name__ == "__main__":
-    program = get_input("inputs/11_input.txt")
+    input_data = get_input("inputs/11_input.txt")
 
-    print(f"Part 1: {part_one(program)}")
-    part_two(program)
+    print(f"Part 1: {part_one(input_data)}")
+    part_two(input_data)
     print("Part 2: UERPRFGJ")

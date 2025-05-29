@@ -9,7 +9,7 @@ Part 2: Take turns between Santa and Robo-Santa and see how many houses they can
 Answer: 2639
 """
 
-from typing import List
+from typing import List, Dict, Tuple
 from utils import profiler
 
 
@@ -27,7 +27,7 @@ def get_input(file_path: str) -> List[str]:
         return list(file.read().strip())
 
 
-def move(x: int, y: int, direction: str, visited: dict[tuple[int, int], int]) -> tuple[dict, int, int]:
+def move(x: int, y: int, direction: str, visited: Dict[Tuple[int, int], int]) -> Tuple[Dict, int, int]:
     """
     Updates the (x, y) position based on the direction and tracks visited houses.
 

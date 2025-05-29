@@ -9,10 +9,11 @@ Part 2: Simulate your complete series of motions on a larger rope with ten knots
 Answer: 2578
 """
 
+from typing import List, Tuple
 from utils import profiler
 
 
-def get_input(file_path: str) -> list:
+def get_input(file_path: str) -> List[str]:
     """
     Reads the input data from the specified file and returns a list of instructions.
 
@@ -30,7 +31,7 @@ def get_input(file_path: str) -> list:
         return [line.strip() for line in file if line.strip()]
 
 
-def move_tail(lead, follow) -> tuple[int, int]:
+def move_tail(lead, follow) -> Tuple[int, int]:
     """
     Moves the tail knot towards the head knot if they are not adjacent. 
 
@@ -65,7 +66,7 @@ def move_tail(lead, follow) -> tuple[int, int]:
 
 
 @profiler
-def simulate_rope_movements(instructions, num_knots):
+def simulate_rope_movements(instructions: List[str], num_knots: int) -> int:
     """
     Simulates the movement of a rope's knots based on the given instructions.
 

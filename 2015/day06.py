@@ -9,7 +9,7 @@ Part 2: What is the total brightness of all lights combined after following Sant
 Answer: 14687245
 """
 
-from typing import List
+from typing import List, Tuple
 import re
 from utils import profiler
 
@@ -28,7 +28,7 @@ def get_input(file_path: str) -> List[str]:
         return [line.strip() for line in file]
 
 
-def parse_instruction(line: str) -> tuple[str, int, int, int, int]:
+def parse_instruction(line: str) -> Tuple[str, int, int, int, int]:
     """
     Parses a line of the input into an instruction and coordinates.
 

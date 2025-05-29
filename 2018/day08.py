@@ -9,7 +9,7 @@ Part 2: What is the value of the root node?
 Answer: 25154
 """
 
-from typing import List
+from typing import List, Tuple
 from utils import profiler
 
 
@@ -27,7 +27,7 @@ def get_input(file_path: str) -> List[int]:
         return list(map(int, file.read().split()))
 
 
-def parse_node(data: List[int], is_part2: bool) -> tuple[int, List[int]]:
+def parse_node(data: List[int], is_part2: bool) -> Tuple[int, List[int]]:
     """
     Parses a node from the data list.
 

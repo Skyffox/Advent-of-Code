@@ -10,7 +10,7 @@ Part 2: With this new disc, and counting again starting from time=0 with the con
 Answer: 3543984
 """
 
-from typing import List
+from typing import List, Tuple
 from utils import profiler
 
 
@@ -28,7 +28,7 @@ def get_input(file_path: str) -> List[str]:
         return [line.strip() for line in file]
 
 
-def parse_discs(data_input: List[str]) -> List[tuple[int, int]]:
+def parse_discs(data_input: List[str]) -> List[Tuple[int, int]]:
     """
     Parses the discs from the input lines.
 
@@ -47,7 +47,7 @@ def parse_discs(data_input: List[str]) -> List[tuple[int, int]]:
     return discs
 
 
-def find_time(discs: List[tuple[int, int]]) -> int:
+def find_time(discs: List[Tuple[int, int]]) -> int:
     """
     Finds the earliest time to press the button to get the capsule through.
 

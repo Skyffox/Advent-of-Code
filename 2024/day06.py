@@ -9,7 +9,7 @@ Part 2: If we could place an obstacle in any position in the grid how many times
 Answer: 1928 (takes ~16 seconds)
 """
 
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 from utils import profiler
 
 
@@ -48,7 +48,7 @@ def patrol(grid: List[List[str]], pos: Tuple[int, int]) -> Tuple[bool, Optional[
     x_limit = len(grid[0])
     y_limit = len(grid)
 
-    visited: dict[Tuple[int, int], List[int]] = {pos: [direction_idx]}
+    visited: Dict[Tuple[int, int], List[int]] = {pos: [direction_idx]}
 
     while True:
         next_x = pos[0] + directions[direction_idx][0]

@@ -9,12 +9,12 @@ Part 2: What is the size of the region containing all locations which have a tot
 Answer: 39560
 """
 
-from typing import List
+from typing import List, Tuple
 from collections import defaultdict
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[tuple[int, int]]:
+def get_input(file_path: str) -> List[Tuple[int, int]]:
     """
     Reads the input file and returns a list of coordinates as tuples.
 
@@ -28,7 +28,7 @@ def get_input(file_path: str) -> List[tuple[int, int]]:
         return [tuple(map(int, line.strip().split(", "))) for line in file]
 
 
-def manhattan_distance(p1: tuple[int, int], p2: tuple[int, int]) -> int:
+def manhattan_distance(p1: Tuple[int, int], p2: Tuple[int, int]) -> int:
     """
     Calculates the Manhattan distance between two points.
 
@@ -43,7 +43,7 @@ def manhattan_distance(p1: tuple[int, int], p2: tuple[int, int]) -> int:
 
 
 @profiler
-def part_one(data_input: List[tuple[int, int]]) -> int:
+def part_one(data_input: List[Tuple[int, int]]) -> int:
     """
     Solves part one of the problem using the provided input data.
 
@@ -84,7 +84,7 @@ def part_one(data_input: List[tuple[int, int]]) -> int:
 
 
 @profiler
-def part_two(data_input: List[tuple[int, int]], max_distance: int = 10000) -> int:
+def part_two(data_input: List[Tuple[int, int]], max_distance: int = 10000) -> int:
     """
     Solves part two of the problem using the provided input data.
 

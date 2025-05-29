@@ -9,11 +9,14 @@ Part 2: What is the level of monkey business after 10000 rounds?
 Answer: 25272176808
 """
 
+from typing import Tuple, List, Dict, Any
 from copy import deepcopy
 from utils import profiler
 
+Monkey = Dict[str, Any]  # For better clarity, you could use TypedDict or dataclass for stricter typing
 
-def get_input(file_path: str) -> tuple[list, int]:
+
+def get_input(file_path: str) -> Tuple[List[Monkey], int]:
     """
     Parses the input data to initialize the monkey simulation.
 
@@ -57,7 +60,7 @@ def get_input(file_path: str) -> tuple[list, int]:
     return monkeys, lcm
 
 
-def evaluate_operation(old, operation):
+def evaluate_operation(old: int, operation: str) -> int:
     """
     Evaluates and applies the operation on an item, modifying its value based on the operation provided.
 
@@ -83,7 +86,7 @@ def evaluate_operation(old, operation):
 
 
 @profiler
-def simulate_monkey_business(monkeys, lcm, rounds=20, divide=True):
+def simulate_monkey_business(monkeys: List[Monkey], lcm: int, rounds: int = 20, divide: bool = True) -> int:
     """
     Simulates the process of each monkey inspecting and passing items for a given number of rounds.
 

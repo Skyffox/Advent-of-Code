@@ -9,7 +9,7 @@ Part 2: Identify the single claim that does not overlap with any others.
 Answer: 1178
 """
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from utils import profiler
 
 
@@ -38,7 +38,7 @@ def get_input(file_path: str) -> List[Tuple[int, int, int, int, str]]:
 
 
 @profiler
-def part_1(claims: List[Tuple[int, int, int, int, str]]) -> Tuple[int, dict[Tuple[int, int], int]]:
+def part_1(claims: List[Tuple[int, int, int, int, str]]) -> Tuple[int, Dict[Tuple[int, int], int]]:
     """
     Counts how many square inches are covered by two or more claims.
 
@@ -59,7 +59,7 @@ def part_1(claims: List[Tuple[int, int, int, int, str]]) -> Tuple[int, dict[Tupl
 
 
 @profiler
-def part_2(claims: List[Tuple[int, int, int, int, str]], grid: dict[Tuple[int, int], int]) -> str:
+def part_2(claims: List[Tuple[int, int, int, int, str]], grid: Dict[Tuple[int, int], int]) -> str:
     """
     Finds the claim that does not overlap with any other.
 

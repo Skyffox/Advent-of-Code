@@ -9,7 +9,7 @@ Part 2: How many regions are present given your key string?
 Answer: 1139
 """
 
-from typing import List
+from typing import List, Tuple
 from utils import profiler
 
 
@@ -72,7 +72,7 @@ def hex_to_bin(hex_str: str) -> str:
     return bin(int(hex_str, 16))[2:].zfill(128)
 
 
-def neighbors(r: int, c: int, rows: int, cols: int) -> List[tuple]:
+def neighbors(r: int, c: int, rows: int, cols: int) -> List[Tuple[int, int]]:
     """
     Returns neighbors (up/down/left/right) within grid bounds.
 
