@@ -1,13 +1,16 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 4: The Ideal Stocking Stuffer
 
-Part 2: 
-Answer: 
+Part 1: Santa needs help mining some AdventCoins. To do this, he needs to find MD5 hashes which, in hexadecimal, start with at least five zeroes.
+Answer: 117946
+
+Part 2: Now find one that starts with six zeroes.
+Answer: 3938038
 """
 
 from typing import List
+import hashlib
 from utils import profiler
 
 
@@ -22,45 +25,33 @@ def get_input(file_path: str) -> List[str]:
         list[str]: A list of lines with leading/trailing whitespace removed.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-
-    return file
+        return [line.strip() for line in file]
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def find_lowest_number(secret_key: str, leading_zeros: int) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Finds the lowest positive integer such that the MD5 hash of the secret key
+    and the integer starts with the specified number of leading zeroes.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        secret_key (str): The secret key to hash.
+        leading_zeros (int): Number of leading zeroes required in the hash.
 
     Returns:
-        int: The result for part one.
+        int: The lowest positive integer that meets the criteria.
     """
-    # TODO: Implement part one logic
-    return 0
-
-
-@profiler
-def part_two(data_input: List[str]) -> int:
-    """
-    Solves part two of the problem using the provided input data.
-
-    Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
-
-    Returns:
-        int: The result for part two.
-    """
-    # TODO: Implement part two logic
-    return 0
+    prefix = "0" * leading_zeros
+    number = 0
+    while True:
+        hash_result = hashlib.md5(f"{secret_key}{number}".encode()).hexdigest()
+        if hash_result.startswith(prefix):
+            return number
+        number += 1
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/4_input.txt")
 
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    print(f"Part 1: {find_lowest_number(input_data[0], 5)}")
+    print(f"Part 2: {find_lowest_number(input_data[0], 6)}")

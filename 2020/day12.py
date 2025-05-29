@@ -1,12 +1,16 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 12: Rain Risk
 
-Part 2: 
-Answer: 
+Part 1: What is the Manhattan distance between that location and the ship's starting position?
+Answer: 1457
+
+Part 2: Almost all of the actions indicate how to move a waypoint which is relative to the ship's position.
+        What is the Manhattan distance between that location and the ship's starting position?
+Answer: 106860
 """
 
+import math
 from typing import List
 from utils import profiler
 
@@ -22,45 +26,91 @@ def get_input(file_path: str) -> List[str]:
         list[str]: A list of lines with leading/trailing whitespace removed.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-
-    return file
+        return [line.strip() for line in file.readlines()]
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(instructions: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Navigates the ship based on the given instructions and returns the Manhattan distance.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        instructions (list[str]): A list of navigation instructions.
 
     Returns:
-        int: The result for part one.
+        int: The Manhattan distance between the ship's starting position and its final position.
     """
-    # TODO: Implement part one logic
-    return 0
+    x, y = 0, 0     # Ship's position
+    direction = 90  # Facing East
+
+    for instruction in instructions:
+        action, value = instruction[0], int(instruction[1:])
+        if action == "N":
+            y += value
+        elif action == "S":
+            y -= value
+        elif action == "E":
+            x += value
+        elif action == "W":
+            x -= value
+        elif action == "L":
+            direction = (direction - value) % 360
+        elif action == "R":
+            direction = (direction + value) % 360
+        elif action == "F":
+            # Move in the current direction using trigonometry
+            x += round(math.cos(math.radians(direction)) * value)
+            y += round(math.sin(math.radians(direction)) * value)
+
+    return abs(x) + abs(y)
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
-    """
-    Solves part two of the problem using the provided input data.
-
+def part_two(instructions):
+    """   
+    The ship starts at (0, 0), and a waypoint starts at (10, 1) relative to the ship.
+    Movement instructions affect the waypoint, and 'F' moves the ship toward it.
+    
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
-
+        instructions (list of str): A list of instructions like ["F10", "N3", "R90"]
+    
     Returns:
-        int: The result for part two.
+        int: Manhattan distance from the starting position to the final position
     """
-    # TODO: Implement part two logic
-    return 0
+    sx, sy = 0, 0   # Ship's position
+    wx, wy = 10, 1  # Waypoint's position
+
+    for instruction in instructions:
+        action, value = instruction[0], int(instruction[1:])
+        if action == "N":
+            wy += value
+        elif action == "S":
+            wy -= value
+        elif action == "E":
+            wx += value
+        elif action == "W":
+            wx -= value
+        elif action == "L":
+            # Rotate waypoint around the origin (ship's position)
+            angle = math.radians(value)
+            wx_new = round(math.cos(angle) * wx - math.sin(angle) * wy)
+            wy = round(math.sin(angle) * wx + math.cos(angle) * wy)
+            wx = wx_new
+        elif action == "R":
+            angle = math.radians(360 - value)
+            wx_new = round(math.cos(angle) * wx - math.sin(angle) * wy)
+            wy = round(math.sin(angle) * wx + math.cos(angle) * wy)
+            wx = wx_new
+        elif action == "F":
+            # Move ship toward waypoint
+            sx += wx * value
+            sy += wy * value
+
+    return abs(sx) + abs(sy)
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/12_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

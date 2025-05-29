@@ -1,13 +1,17 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 6: Signals and Noise
 
-Part 2: 
-Answer: 
+Part 1: Given the recording in your puzzle input, what is the error-corrected version of the message being sent?
+Answer: wkbvmikb
+
+Part 2: Given the recording in your puzzle input and this new decoding methodology, what is the original message that Santa is trying to send?
+Answer: evakwaga
+
 """
 
 from typing import List
+from collections import Counter
 from utils import profiler
 
 
@@ -19,48 +23,52 @@ def get_input(file_path: str) -> List[str]:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        list[str]: List of lines.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-
-    return file
+        return [line.strip() for line in file]
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(data_input: List[str]) -> str:
     """
-    Solves part one of the problem using the provided input data.
+    Decodes the message by selecting the most common letter in each column.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): List of input strings.
 
     Returns:
-        int: The result for part one.
+        str: Decoded message using most common letters.
     """
-    # TODO: Implement part one logic
-    return 0
+    decoded = []
+    for col_idx in range(len(data_input[0])):
+        column = [line[col_idx] for line in data_input]
+        most_common_char = Counter(column).most_common(1)[0][0]
+        decoded.append(most_common_char)
+    return "".join(decoded)
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(data_input: List[str]) -> str:
     """
-    Solves part two of the problem using the provided input data.
+    Decodes the message by selecting the least common letter in each column.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): List of input strings.
 
     Returns:
-        int: The result for part two.
+        str: Decoded message using least common letters.
     """
-    # TODO: Implement part two logic
-    return 0
+    decoded = []
+    for col_idx in range(len(data_input[0])):
+        column = [line[col_idx] for line in data_input]
+        least_common_char = Counter(column).most_common()[-1][0]
+        decoded.append(least_common_char)
+    return "".join(decoded)
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/6_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

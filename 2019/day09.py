@@ -1,66 +1,61 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 09: Sensor Boost
 
-Part 2: 
-Answer: 
+Part 1: What BOOST keycode does it produce?
+Answer: 3497884671
+
+Part 2: Run the BOOST program in sensor boost mode. What are the coordinates of the distress signal?
+Answer: 46470
 """
 
 from typing import List
+from utils import IntcodeComputer
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> List[int]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and returns the Intcode program as a list of integers.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        List[int]: The Intcode program.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
+        return list(map(int, file.read().strip().split(",")))
 
-    return file
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def run_boost_diagnostic(program: List[int], input_value: int) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Runs the Intcode program in BOOST mode using the provided input value
+    and returns the final diagnostic output.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        program (List[int]): The Intcode program to execute.
+        input_value (int): Input value for the BOOST system (1 for test mode, 2 for keycode mode).
 
     Returns:
-        int: The result for part one.
+        int: The final output value produced by the program.
     """
-    # TODO: Implement part one logic
-    return 0
+    computer = IntcodeComputer(program.copy())
+    computer.add_input(input_value)
+    output = None
 
+    while not computer.halted:
+        val = computer.run()
+        if val is not None:
+            output = val
 
-@profiler
-def part_two(data_input: List[str]) -> int:
-    """
-    Solves part two of the problem using the provided input data.
-
-    Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
-
-    Returns:
-        int: The result for part two.
-    """
-    # TODO: Implement part two logic
-    return 0
+    return output
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/9_input.txt")
 
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    print(f"Part 1: {run_boost_diagnostic(input_data, 1)}")
+    print(f"Part 2: {run_boost_diagnostic(input_data, 2)}")

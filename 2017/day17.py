@@ -1,66 +1,76 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 17: Spinlock
 
-Part 2: 
-Answer: 
+Part 1: What is the value after 2017 in your completed circular buffer?
+Answer: 808
+
+Part 2: What is the value after 0 the moment 50000000 is inserted?
+Answer: 47465686
 """
 
-from typing import List
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> int:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and returns the step size.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        int: Step size as integer.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-
-    return file
+        return int(file.readline().strip())
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(step_size: int) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Simulates the spinlock for 2017 insertions and returns the value after 2017.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        step_size (int): Number of steps to move forward before inserting.
 
     Returns:
-        int: The result for part one.
+        int: Value immediately after 2017 in the buffer.
     """
-    # TODO: Implement part one logic
-    return 0
+    buffer = [0]
+    pos = 0
+    for i in range(1, 2018):
+        pos = (pos + step_size) % len(buffer) + 1
+        buffer.insert(pos, i)
+    return buffer[pos + 1]
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(step_size: int) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Finds the value after 0 after 50 million insertions (optimized).
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        step_size (int): Number of steps to move forward before inserting.
 
     Returns:
-        int: The result for part two.
+        int: Value immediately after 0.
     """
-    # TODO: Implement part two logic
-    return 0
+    pos = 0
+    value_after_zero = None
+    length = 1
+
+    for i in range(1, 50_000_001):
+        pos = (pos + step_size) % length + 1
+        if pos == 1:
+            value_after_zero = i
+        length += 1
+
+    return value_after_zero
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    step = get_input("inputs/17_input.txt")
 
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    print(f"Part 1: {part_one(step)}")
+    print(f"Part 2: {part_two(step)}")

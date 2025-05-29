@@ -1,66 +1,61 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 15: Rambunctious Recitation
 
-Part 2: 
-Answer: 
+Part 1: Given your starting numbers, what will be the 2020th number spoken?
+Answer: 1428
+
+Part 2: Given your starting numbers, what will be the 30000000th number spoken?
+Answer: 3718541
+
 """
 
 from typing import List
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> List[int]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and returns a list of integers.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        list[int]: List of starting numbers.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-
-    return file
+        return [int(x) for x in file.read().strip().split(",")]
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def play_memory_game(starting_numbers: List[int], target_turn: int) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Plays the memory game until the target turn and returns the last spoken number.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        starting_numbers (list[int]): The starting numbers.
+        target_turn (int): The turn to stop at.
 
     Returns:
-        int: The result for part one.
+        int: The number spoken at the target turn.
     """
-    # TODO: Implement part one logic
-    return 0
+    last_seen = {num: i + 1 for i, num in enumerate(starting_numbers[:-1])}
+    last_number = starting_numbers[-1]
 
+    for turn in range(len(starting_numbers), target_turn):
+        if last_number in last_seen:
+            next_number = turn - last_seen[last_number]
+        else:
+            next_number = 0
+        last_seen[last_number] = turn
+        last_number = next_number
 
-@profiler
-def part_two(data_input: List[str]) -> int:
-    """
-    Solves part two of the problem using the provided input data.
-
-    Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
-
-    Returns:
-        int: The result for part two.
-    """
-    # TODO: Implement part two logic
-    return 0
+    return last_number
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/15_input.txt")
 
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    print(f"Part 1: {play_memory_game(input_data, 2020)}")
+    print(f"Part 2: {play_memory_game(input_data, 30000000)}")

@@ -1,66 +1,92 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 13: Packet Scanners
 
-Part 2: 
-Answer: 
+Part 1: Given the details of the firewall you've recorded, if you leave immediately, what is the severity of your whole trip?
+Answer: 1316
+
+Part 2: What is the fewest number of picoseconds that you need to delay the packet to pass through the firewall without being caught?
+Answer: 3840052
 """
 
-from typing import List
+from typing import List, Dict
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> Dict[int, int]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and parses the input into a dictionary mapping depth to range.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        Dict[int, int]: Mapping of layer depth to scanner range.
     """
+    firewall = {}
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
-            line = line.strip()
+            depth, rng = line.split(": ")
+            firewall[int(depth)] = int(rng)
+    return firewall
 
-    return file
+
+def caught(firewall: Dict[int, int], delay: int) -> bool:
+    """
+    Checks if packet is caught given a delay.
+
+    Args:
+        firewall (Dict[int, int]): Firewall layers.
+        delay (int): Delay before starting.
+
+    Returns:
+        bool: True if caught, else False.
+    """
+    for depth, rng in firewall.items():
+        period = 2 * (rng - 1)
+        if (depth + delay) % period == 0:
+            return True
+    return False
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(firewall: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Calculates total severity of getting caught with no delay.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): Input firewall data.
 
     Returns:
-        int: The result for part one.
+        int: Total severity.
     """
-    # TODO: Implement part one logic
-    return 0
+    total = 0
+    for depth, rng in firewall.items():
+        period = 2 * (rng - 1)
+        if depth % period == 0:
+            total += depth * rng
+    return total
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(firewall: List[str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Finds minimum delay to pass without getting caught.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): Input firewall data.
 
     Returns:
-        int: The result for part two.
+        int: Minimum delay.
     """
-    # TODO: Implement part two logic
-    return 0
+    delay = 0
+    while caught(firewall, delay):
+        delay += 1
+    return delay
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/13_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

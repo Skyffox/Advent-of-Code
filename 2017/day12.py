@@ -1,66 +1,96 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 12: Digital Plumber
 
-Part 2: 
-Answer: 
+Part 1: How many programs are in the group that contains program ID 0?
+Answer: 152
+
+Part 2: How many groups are there in total?
+Answer: 186
 """
 
-from typing import List
+from typing import List, Dict, Set
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> Dict[int, List[int]]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and returns a list of connection lines.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        Dict[int, List[int]]: Graph adjacency list.
     """
+    graph = {}
     with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
-            line = line.strip()
+            node_str, neighbors_str = line.split(" <-> ")
+            node = int(node_str)
+            neighbors = list(map(int, neighbors_str.split(", ")))
+            graph[node] = neighbors
 
-    return file
+    return graph
+
+
+def dfs(graph: Dict[int, List[int]], start: int, visited: Set[int]) -> None:
+    """
+    Depth-first search to mark all connected nodes.
+
+    Args:
+        graph (Dict[int, List[int]]): Graph adjacency list.
+        start (int): Starting node.
+        visited (Set[int]): Set of visited nodes.
+    """
+    stack = [start]
+    while stack:
+        node = stack.pop()
+        if node not in visited:
+            visited.add(node)
+            stack.extend(graph[node])
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(graph: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Counts number of nodes in the group containing node 0.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): Input connection lines.
 
     Returns:
-        int: The result for part one.
+        int: Size of group containing node 0.
     """
-    # TODO: Implement part one logic
-    return 0
+    visited = set()
+    dfs(graph, 0, visited)
+    return len(visited)
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(graph: List[str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Counts number of distinct groups in the graph.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): Input connection lines.
 
     Returns:
-        int: The result for part two.
+        int: Number of groups.
     """
-    # TODO: Implement part two logic
-    return 0
+    visited = set()
+    groups = 0
+
+    for node in graph.keys():
+        if node not in visited:
+            dfs(graph, node, visited)
+            groups += 1
+
+    return groups
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/12_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

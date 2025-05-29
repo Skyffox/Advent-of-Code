@@ -1,66 +1,98 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 10: Balance Bots
 
-Part 2: 
-Answer: 
+Part 1: Based on your instructions, what is the number of the bot that is responsible for comparing value-61 microchips with value-17 microchips?
+Answer: 157
+
+Part 2: What do you get if you multiply together the values of one chip in each of outputs 0, 1, and 2?
+Answer: 71184
 """
 
-from typing import List
+import re
+from typing import List, Dict, Tuple
 from utils import profiler
 
 
 def get_input(file_path: str) -> List[str]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and returns a list of instruction lines.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        list[str]: List of instructions.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-
-    return file
+        return [line.strip() for line in file]
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def compute(data_input: List[str]) -> Tuple[int, int]:
     """
-    Solves part one of the problem using the provided input data.
+    Simulates bots comparing microchips to find the bot that compares chip 61 and 17 and
+    after running the simulation, multiplies outputs 0,1,2 chip values.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): List of instructions.
 
     Returns:
-        int: The result for part one.
+        int: The bot number responsible for comparing chips 61 and 17.
+        int: Product of chips in outputs 0, 1, and 2.
     """
-    # TODO: Implement part one logic
-    return 0
+    bots: Dict[int, List[int]] = {}
+    outputs: Dict[int, List[int]] = {}
+    instructions = []
+    answer_part_1 = -1
 
+    for line in data_input:
+        if line.startswith("value"):
+            value, bot = map(int, re.findall(r'\d+', line))
+            bots.setdefault(bot, []).append(value)
+        else:
+            instructions.append(line)
 
-@profiler
-def part_two(data_input: List[str]) -> int:
-    """
-    Solves part two of the problem using the provided input data.
+    # Run simulation until no bot can act
+    while True:
+        action_performed = False
+        for instr in instructions:
+            m = re.match(r'bot (\d+) gives low to (bot|output) (\d+) and high to (bot|output) (\d+)', instr)
+            if not m:
+                continue
+            bot_id = int(m.group(1))
+            low_type, low_id = m.group(2), int(m.group(3))
+            high_type, high_id = m.group(4), int(m.group(5))
 
-    Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+            if bot_id in bots and len(bots[bot_id]) == 2:
+                chips = sorted(bots[bot_id])
 
-    Returns:
-        int: The result for part two.
-    """
-    # TODO: Implement part two logic
-    return 0
+                # Check for part 1 condition: comparing 61 and 17
+                if set(chips) == {17, 61}:
+                    answer_part_1 = bot_id
+
+                if low_type == 'bot':
+                    bots.setdefault(low_id, []).append(chips[0])
+                else:
+                    outputs.setdefault(low_id, []).append(chips[0])
+
+                if high_type == 'bot':
+                    bots.setdefault(high_id, []).append(chips[1])
+                else:
+                    outputs.setdefault(high_id, []).append(chips[1])
+
+                bots[bot_id] = []
+                action_performed = True
+        if not action_performed:
+            break
+
+    # Multiply chips in outputs 0, 1, and 2
+    return answer_part_1, outputs.get(0, [1])[0] * outputs.get(1, [1])[0] * outputs.get(2, [1])[0]
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/10_input.txt")
+    specific_bot, multiplied_outputs = compute(input_data)
 
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    print(f"Part 1: {specific_bot}")
+    print(f"Part 2: {multiplied_outputs}")

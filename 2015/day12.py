@@ -1,13 +1,16 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 12: JSAbacusFramework.io
 
-Part 2: 
-Answer: 
+Part 1: What is the sum of all numbers in the document?
+Answer: 111754
+
+Part 2: Ignore any object (and all of its children) which has any property with the value "red". 
+Answer: 65402
 """
 
-from typing import List
+from typing import List, Any
+import json
 from utils import profiler
 
 
@@ -22,45 +25,64 @@ def get_input(file_path: str) -> List[str]:
         list[str]: A list of lines with leading/trailing whitespace removed.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-
-    return file
+        return [line.strip() for line in file]
 
 
 @profiler
 def part_one(data_input: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Sums all numbers in the input JSON, regardless of structure.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): A list of input lines.
 
     Returns:
-        int: The result for part one.
+        int: Sum of all numbers.
     """
-    # TODO: Implement part one logic
-    return 0
+    text = data_input[0].replace('[', ' ').replace(']', ' ').replace('{', ' ').replace('}', ' ').replace(',', ' ').replace(':', ' ').split()
+    return sum([int(n) for n in text if n.lstrip('-').isdigit()])
+
+
+def sum_json_excluding_red(data: Any) -> int:
+    """
+    Recursively sums all numbers in the JSON data, excluding any objects
+    (dicts) with a value "red".
+
+    Args:
+        data (Any): Parsed JSON data.
+
+    Returns:
+        int: The conditional sum of numbers.
+    """
+    if isinstance(data, int):
+        return data
+    elif isinstance(data, list):
+        return sum(sum_json_excluding_red(item) for item in data)
+    elif isinstance(data, dict):
+        if "red" in data.values():
+            return 0
+        return sum(sum_json_excluding_red(val) for val in data.values())
+    else:
+        return 0
 
 
 @profiler
 def part_two(data_input: List[str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Sums all numbers in the input JSON, excluding any object with "red".
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): A list of input lines.
 
     Returns:
-        int: The result for part two.
+        int: Conditional sum of numbers.
     """
-    # TODO: Implement part two logic
-    return 0
+    json_data = json.loads(data_input[0])
+    return sum_json_excluding_red(json_data)
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/12_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

@@ -1,13 +1,16 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 16: Aunt Sue
 
-Part 2: 
-Answer: 
+Part 1: What is the number of the Sue that got you the gift?
+Answer: 373
+
+Part 2: What is the number of the real Aunt Sue?
+Answer: 260
 """
 
-from typing import List
+from typing import List, Dict
+import re
 from utils import profiler
 
 
@@ -22,45 +25,119 @@ def get_input(file_path: str) -> List[str]:
         list[str]: A list of lines with leading/trailing whitespace removed.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
+        return [line.strip() for line in file]
 
-    return file
+
+def parse_aunts(data: List[str]) -> List[Dict[str, int]]:
+    """
+    Parses each Aunt Sue's description into a dictionary.
+
+    Args:
+        data (List[str]): List of lines describing each Aunt Sue.
+
+    Returns:
+        List[Dict[str, int]]: List of dictionaries of Aunt Sue's attributes.
+    """
+    aunts = []
+    pattern = re.compile(r"Sue \d+: (.+)")
+    for line in data:
+        match = pattern.match(line)
+        if not match:
+            continue
+        attributes_part = match.group(1)
+        attributes = {}
+        for attr in attributes_part.split(", "):
+            key, value = attr.split(": ")
+            attributes[key] = int(value)
+        aunts.append(attributes)
+    return aunts
 
 
 @profiler
 def part_one(data_input: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Finds the Aunt Sue that matches the gift giver's attributes exactly.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): Input lines describing Aunt Sues.
 
     Returns:
-        int: The result for part one.
+        int: The number of the matching Aunt Sue.
     """
-    # TODO: Implement part one logic
-    return 0
+    aunts = parse_aunts(data_input)
+
+    # Gift giver's known attributes
+    gift = {
+        "children": 3,
+        "cats": 7,
+        "samoyeds": 2,
+        "pomeranians": 3,
+        "akitas": 0,
+        "vizslas": 0,
+        "goldfish": 5,
+        "trees": 3,
+        "cars": 2,
+        "perfumes": 1,
+    }
+
+    for i, aunt in enumerate(aunts, 1):
+        if all(aunt.get(k, v) == v for k, v in gift.items()):
+            return i
+
+
+    return -1
 
 
 @profiler
 def part_two(data_input: List[str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Finds the Aunt Sue that matches the gift giver's attributes with
+    modified comparison rules.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): Input lines describing Aunt Sues.
 
     Returns:
-        int: The result for part two.
+        int: The number of the matching Aunt Sue.
     """
-    # TODO: Implement part two logic
-    return 0
+    aunts = parse_aunts(data_input)
+
+    gift = {
+        "children": 3,
+        "cats": 7,
+        "samoyeds": 2,
+        "pomeranians": 3,
+        "akitas": 0,
+        "vizslas": 0,
+        "goldfish": 5,
+        "trees": 3,
+        "cars": 2,
+        "perfumes": 1,
+    }
+
+    for i, aunt in enumerate(aunts, 1):
+        match = True
+        for key, val in aunt.items():
+            if key in ["cats", "trees"]:
+                if val <= gift[key]:
+                    match = False
+                    break
+            elif key in ["pomeranians", "goldfish"]:
+                if val >= gift[key]:
+                    match = False
+                    break
+            else:
+                if val != gift[key]:
+                    match = False
+                    break
+        if match:
+            return i
+
+    return -1
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/16_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

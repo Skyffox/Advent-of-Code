@@ -10,6 +10,7 @@ Answer: 6577
 """
 
 from typing import List
+from utils import IntcodeComputer
 from utils import profiler
 
 
@@ -27,72 +28,61 @@ def get_input(file_path: str) -> List[int]:
         return list(map(int, file.readline().strip().split(",")))
 
 
-def run_program(instructions: List[int], noun: int = None, verb: int = None) -> int:
+def run_program_with_inputs(program: List[int], noun: int, verb: int) -> int:
     """
-    Simulate the intcode program.
+    Runs an Intcode program with the provided noun and verb values,
+    returning the value at position 0 after execution.
 
     Args:
-        instructions (List[int]): Program memory.
-        noun (int, optional): Override value at position 1.
-        verb (int, optional): Override value at position 2.
+        program (List[int]): The initial state of the Intcode program (memory).
+        noun (int): The value to insert at position 1 in the program.
+        verb (int): The value to insert at position 2 in the program.
 
     Returns:
-        int: Value at position 0 after program halts.
+        int: The value at position 0 of the program after it halts.
     """
-    memory = instructions.copy()
-    if noun is not None:
-        memory[1] = noun
-    if verb is not None:
-        memory[2] = verb
+    memory = program.copy()
+    memory[1] = noun
+    memory[2] = verb
+    computer = IntcodeComputer(memory)
 
-    ip = 0 # Instruction pointer
-    while True:
-        opcode = memory[ip]
-        if opcode == 99:
-            break
-        a, b, c = memory[ip + 1], memory[ip + 2], memory[ip + 3]
+    while not computer.halted:
+        computer.run()
 
-        if opcode == 1:
-            memory[c] = memory[a] + memory[b]
-        elif opcode == 2:
-            memory[c] = memory[a] * memory[b]
-        else:
-            raise ValueError(f"Unknown opcode {opcode} at position {ip}")
-        ip += 4
-
-    return memory[0]
+    return computer.memory[0]
 
 
 @profiler
-def part_1(instructions: List[int]) -> int:
+def part_1(program: List[int]) -> int:
     """
     Run the Intcode program with fixed noun and verb.
 
     Args:
-        instructions (List[int]): The Intcode program.
+        program (List[int]): The Intcode program.
 
     Returns:
         int: Output at position 0 after execution.
     """
-    return run_program(instructions, noun=12, verb=2)
+    return run_program_with_inputs(program, 12, 2)
 
 
 @profiler
-def part_2(instructions: List[int]) -> int:
+def part_2(program: List[int], target: int = 19690720) -> int:
     """
     Brute-force search for noun and verb that cause the program to produce the target output.
 
     Args:
-        instructions (List[int]): The Intcode program.
+        program (List[int]): The Intcode program.
 
     Returns:
         int: 100 * noun + verb that produces the target output.
     """
-    target = 19690720
     for noun in range(100):
         for verb in range(100):
-            if run_program(instructions, noun, verb) == target:
+            output = run_program_with_inputs(program, noun, verb)
+            if output == target:
                 return 100 * noun + verb
+    return None  # Not found
 
 
 if __name__ == "__main__":

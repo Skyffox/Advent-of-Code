@@ -1,10 +1,13 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 8: Matchsticks
 
-Part 2: 
-Answer: 
+Part 1: Disregarding the whitespace in the file, what is the number of characters of code for string literals minus the number of characters in 
+        memory for the values of the strings in total for the entire file?
+Answer: 1333
+
+Part 2: Find the total number of characters to represent the newly encoded strings minus the number of characters of code in each original string literal.
+Answer: 2046
 """
 
 from typing import List
@@ -22,16 +25,27 @@ def get_input(file_path: str) -> List[str]:
         list[str]: A list of lines with leading/trailing whitespace removed.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
+        return [line.strip() for line in file]
 
-    return file
+
+def encoded_length(line: str) -> int:
+    """
+    Returns the length of the encoded version of the string.
+
+    Args:
+        line (str): The input string literal.
+
+    Returns:
+        int: The length after escaping characters.
+    """
+    escaped = line.replace("\\", "\\\\").replace("\"", "\\\"")
+    return len(f"\"{escaped}\"")
 
 
 @profiler
 def part_one(data_input: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Calculate the sum of number of characters of code for string literals minus the number of characters in memory.
 
     Args:
         data_input (List[str]): A list of input lines from the puzzle input file.
@@ -39,14 +53,13 @@ def part_one(data_input: List[str]) -> int:
     Returns:
         int: The result for part one.
     """
-    # TODO: Implement part one logic
-    return 0
+    return sum(len(line) - len(eval(line)) for line in data_input)
 
 
 @profiler
 def part_two(data_input: List[str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Calculate the sum of the total number of characters to represent the newly encoded strings minus the number of characters of code.
 
     Args:
         data_input (List[str]): A list of input lines from the puzzle input file.
@@ -54,13 +67,11 @@ def part_two(data_input: List[str]) -> int:
     Returns:
         int: The result for part two.
     """
-    # TODO: Implement part two logic
-    return 0
+    return sum(encoded_length(line) - len(line) for line in data_input)
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/8_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

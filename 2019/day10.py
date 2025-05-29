@@ -1,13 +1,18 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 10: Monitoring Station
 
-Part 2: 
-Answer: 
+Part 1: Find the best location for a new monitoring station. How many other asteroids can be detected from that location?
+Answer: 292
+
+Part 2: The Elves are placing bets on which will be the 200th asteroid to be vaporized. Win the bet by determining which asteroid that will be; 
+        what do you get if you multiply its X coordinate by 100 and then add its Y coordinate? (For example, 8,2 becomes 802.)
+Answer: 317
 """
 
-from typing import List
+from typing import List, Tuple
+from math import atan2, pi
+from collections import defaultdict
 from utils import profiler
 
 
@@ -22,10 +27,37 @@ def get_input(file_path: str) -> List[str]:
         list[str]: A list of lines with leading/trailing whitespace removed.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
+        return [line.strip() for line in file if line.strip()]
 
-    return file
+
+def parse_asteroids(map_data: List[str]) -> List[Tuple[int, int]]:
+    """
+    Parses the map into a list of asteroid coordinates.
+
+    Args:
+        map_data (List[str]): The map input.
+
+    Returns:
+        List[Tuple[int, int]]: List of (x, y) asteroid coordinates.
+    """
+    return [(x, y) for y, line in enumerate(map_data) for x, ch in enumerate(line) if ch == '#']
+
+
+def angle_between(source: Tuple[int, int], target: Tuple[int, int]) -> float:
+    """
+    Computes the angle from source to target, adjusted to start from up and rotate clockwise.
+
+    Args:
+        source (Tuple[int, int]): The source coordinate.
+        target (Tuple[int, int]): The target coordinate.
+
+    Returns:
+        float: The angle in radians.
+    """
+    dx = target[0] - source[0]
+    dy = source[1] - target[1] # Reverse Y for upward
+    angle = atan2(dx, dy)
+    return angle % (2 * pi)
 
 
 @profiler
@@ -39,8 +71,14 @@ def part_one(data_input: List[str]) -> int:
     Returns:
         int: The result for part one.
     """
-    # TODO: Implement part one logic
-    return 0
+    asteroids = parse_asteroids(data_input)
+    max_visible = 0
+
+    for base in asteroids:
+        angles = {angle_between(base, other) for other in asteroids if other != base}
+        max_visible = max(max_visible, len(angles))
+
+    return max_visible
 
 
 @profiler
@@ -52,15 +90,50 @@ def part_two(data_input: List[str]) -> int:
         data_input (List[str]): A list of input lines from the puzzle input file.
 
     Returns:
-        int: The result for part two.
+        int: The result for part two (the ID of the 200th vaporized asteroid).
     """
-    # TODO: Implement part two logic
-    return 0
+    asteroids = parse_asteroids(data_input)
+
+    # Step 1: Find best base location
+    best_base = None
+    max_visible = 0
+    for base in asteroids:
+        angles = {angle_between(base, other) for other in asteroids if other != base}
+        if len(angles) > max_visible:
+            best_base = base
+            max_visible = len(angles)
+
+    # Step 2: Group asteroids by angle and sort each group by distance
+    targets = defaultdict(list)
+    for other in asteroids:
+        if other == best_base:
+            continue
+        angle = angle_between(best_base, other)
+        # Calculate the Manhattan distance
+        dist = abs(best_base[0] - other[0]) + abs(best_base[1] - other[1])
+        targets[angle].append((dist, other))
+
+    for group in targets.values():
+        group.sort() # Closest first
+
+    # Step 3: Vaporize asteroids in clockwise order
+    sorted_angles = sorted(targets.keys())
+    vaporized = []
+
+    while len(vaporized) < 200:
+        for angle in sorted_angles:
+            if targets[angle]:
+                _, asteroid = targets[angle].pop(0)
+                vaporized.append(asteroid)
+                if len(vaporized) == 200:
+                    x, y = asteroid
+                    return x * 100 + y
+
+    return -1
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/10_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

@@ -1,66 +1,86 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 7: The Treachery of Whales
 
-Part 2: 
-Answer: 
+Part 1: Determine the horizontal position that the crabs can align to using the least fuel possible. 
+        How much fuel must they spend to align to that position?
+Answer: 344297
+
+Part 2: Determine the horizontal position that the crabs can align to using the least fuel possible so they can make you an escape route! 
+        How much fuel must they spend to align to that position?
+Answer: 97164301
 """
 
 from typing import List
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> List[int]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and returns a list of crab positions.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        List[int]: List of crab horizontal positions.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
+        return list(map(int, file.read().strip().split(",")))
 
-    return file
+
+def fuel_cost_part2(distance: int) -> int:
+    """
+    Calculates the fuel cost for moving a given distance with increasing rate.
+
+    Args:
+        distance (int): Distance to move.
+
+    Returns:
+        int: Fuel cost for that distance.
+    """
+    return distance * (distance + 1) // 2
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(data_input: List[int]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Calculates the minimum fuel needed to align all crabs at the same position (linear cost).
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[int]): List of crab positions.
 
     Returns:
-        int: The result for part one.
+        int: Minimum total fuel cost.
     """
-    # TODO: Implement part one logic
-    return 0
+    median = sorted(data_input)[len(data_input) // 2]
+    return sum(abs(pos - median) for pos in data_input)
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(data_input: List[int]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Calculates the minimum fuel needed to align all crabs at the same position (increasing cost).
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[int]): List of crab positions.
 
     Returns:
-        int: The result for part two.
+        int: Minimum total fuel cost.
     """
-    # TODO: Implement part two logic
-    return 0
+    min_pos = min(data_input)
+    max_pos = max(data_input)
+    min_fuel = float("inf")
+
+    for target in range(min_pos, max_pos + 1):
+        fuel = sum(fuel_cost_part2(abs(pos - target)) for pos in data_input)
+        min_fuel = min(fuel, min_fuel)
+
+    return min_fuel
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/7_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

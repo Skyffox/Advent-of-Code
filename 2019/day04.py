@@ -1,12 +1,15 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 4: Secure Container
 
-Part 2: 
-Answer: 
+Part 1: How many different passwords within the range given in your puzzle input meet the criteria?
+Answer: 594
+
+Part 2: How many different passwords within the range given in your puzzle input meet the additional criteria?
+Answer: 364
 """
 
+from collections import Counter
 from typing import List
 from utils import profiler
 
@@ -22,16 +25,18 @@ def get_input(file_path: str) -> List[str]:
         list[str]: A list of lines with leading/trailing whitespace removed.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-
-    return file
+        return [line.strip() for line in file]
 
 
 @profiler
 def part_one(data_input: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Checks whether a password meets the criteria:
+
+    - The number must be exactly six digits long.
+    - The number must fall within a given inclusive range.
+    - At least one pair of adjacent digits must be identical.
+    - From left to right, the digits must not decrease; they can only stay the same or increase.
 
     Args:
         data_input (List[str]): A list of input lines from the puzzle input file.
@@ -39,14 +44,23 @@ def part_one(data_input: List[str]) -> int:
     Returns:
         int: The result for part one.
     """
-    # TODO: Implement part one logic
-    return 0
+    range_start, range_end = map(int, data_input[0].split("-"))
+
+    return sum(
+        1
+        for password in range(range_start, range_end + 1)
+        if any(str(password)[i] == str(password)[i + 1] for i in range(5)) and
+           all(str(password)[i] <= str(password)[i + 1] for i in range(5))
+    )
 
 
 @profiler
 def part_two(data_input: List[str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Checks whether a password meets the criteria of part 1 
+    and an additional rule is introduced:
+
+    - The two adjacent matching digits must not be part of a larger group of matching digits.
 
     Args:
         data_input (List[str]): A list of input lines from the puzzle input file.
@@ -54,13 +68,18 @@ def part_two(data_input: List[str]) -> int:
     Returns:
         int: The result for part two.
     """
-    # TODO: Implement part two logic
-    return 0
+    range_start, range_end = map(int, data_input[0].split("-"))
+
+    return sum(
+        1
+        for password in range(range_start, range_end + 1)
+        if all(str(password)[i] <= str(password)[i + 1] for i in range(5)) and
+           2 in Counter(str(password)).values()
+    )
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/4_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

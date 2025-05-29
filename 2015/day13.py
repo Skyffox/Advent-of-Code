@@ -1,13 +1,17 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 13: Knights of the Dinner Table
 
-Part 2: 
-Answer: 
+Part 1: What is the total change in happiness for the optimal seating arrangement of the actual guest list?
+Answer: 664
+
+Part 2: What is the total change in happiness for the optimal seating arrangement that actually includes yourself?
+Answer: 640
 """
 
-from typing import List
+from typing import List, Dict
+import re
+import itertools
 from utils import profiler
 
 
@@ -22,45 +26,112 @@ def get_input(file_path: str) -> List[str]:
         list[str]: A list of lines with leading/trailing whitespace removed.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
+        return [line.strip() for line in file]
 
-    return file
+
+def parse_preferences(data: List[str]) -> Dict[str, Dict[str, int]]:
+    """
+    Parses the happiness preferences into a nested dictionary.
+
+    Args:
+        data (List[str]): Lines describing happiness effects.
+
+    Returns:
+        Dict[str, Dict[str, int]]: Mapping person -> neighbor -> happiness effect.
+    """
+    preferences = {}
+    pattern = re.compile(r"(\w+) would (gain|lose) (\d+) happiness units by sitting next to (\w+).")
+    for line in data:
+        match = pattern.match(line)
+        if not match:
+            continue
+        person, gain_lose, amount, neighbor = match.groups()
+        amount = int(amount) if gain_lose == "gain" else -int(amount)
+        preferences.setdefault(person, {})[neighbor] = amount
+    return preferences
+
+
+def calculate_happiness(arrangement: List[str], preferences: Dict[str, Dict[str, int]]) -> int:
+    """
+    Calculates the total happiness for a circular seating arrangement.
+
+    Args:
+        arrangement (List[str]): Ordered list of people around the table.
+        preferences (Dict[str, Dict[str, int]]): Happiness mapping.
+
+    Returns:
+        int: Total happiness for the arrangement.
+    """
+    total = 0
+    n = len(arrangement)
+    for i in range(n):
+        left = arrangement[i]
+        right = arrangement[(i + 1) % n]
+        total += preferences[left][right] + preferences[right][left]
+    return total
 
 
 @profiler
 def part_one(data_input: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Finds the optimal seating arrangement maximizing total happiness.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): Input lines with preferences.
 
     Returns:
-        int: The result for part one.
+        int: Maximum total happiness.
     """
-    # TODO: Implement part one logic
-    return 0
+    preferences = parse_preferences(data_input)
+    people = list(preferences.keys())
+
+    # Fix one person to reduce permutations due to circular symmetry
+    first = people[0]
+    others = people[1:]
+
+    max_happiness = max(
+        calculate_happiness([first] + list(p), preferences)
+        for p in itertools.permutations(others)
+    )
+    return max_happiness
 
 
 @profiler
 def part_two(data_input: List[str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Finds the optimal seating including yourself (0 happiness with others).
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): Input lines with preferences.
 
     Returns:
-        int: The result for part two.
+        int: Maximum total happiness including yourself.
     """
-    # TODO: Implement part two logic
-    return 0
+    preferences = parse_preferences(data_input)
+    people = list(preferences.keys())
+    you = "You"
+
+    # Add yourself with zero happiness effects to everyone
+    preferences[you] = {}
+    for person in people:
+        preferences[person][you] = 0
+        preferences[you][person] = 0
+
+    people.append(you)
+
+    # Fix one person to reduce permutations due to circular symmetry
+    first = people[0]
+    others = people[1:]
+
+    max_happiness = max(
+        calculate_happiness([first] + list(p), preferences)
+        for p in itertools.permutations(others)
+    )
+    return max_happiness
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/13_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

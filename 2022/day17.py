@@ -152,7 +152,7 @@ def simulate_rock_fall(jet_pattern: str, total_rocks: int) -> int:
                 remaining_rocks = total_rocks - rock_count
                 cycles_remaining = remaining_rocks // rocks_per_cycle
                 rock_remainder = remaining_rocks % rocks_per_cycle
-                
+
                 # We have some rocks left to simulate (the remainder) so we calculate the height
                 # increase after all the cycles are done, and set the rock_count so that
                 # we only have the rock_remainder left to simulate

@@ -1,66 +1,88 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 14: Chocolate Charts
 
-Part 2: 
-Answer: 
+Part 1: What are the scores of the ten recipes immediately after the number of recipes in your puzzle input?
+Answer: 8176111038
+
+Part 2: How many recipes appear on the scoreboard to the left of the score sequence in your puzzle input?
+Answer: 20225578
 """
 
-from typing import List
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> int:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and returns the puzzle input as an integer.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        int: The puzzle input number.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
-
-    return file
+        return int(file.read().strip())
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(recipes_after: int) -> str:
     """
-    Solves part one of the problem using the provided input data.
+    Finds the scores of ten recipes immediately after the given number of recipes.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        recipes_after (int): Number of recipes after which to find the scores.
 
     Returns:
-        int: The result for part one.
+        str: The concatenated scores of the ten recipes after the given number.
     """
-    # TODO: Implement part one logic
-    return 0
+    recipes = [3, 7]
+    elf1, elf2 = 0, 1
+
+    while len(recipes) < recipes_after + 10:
+        new_score = recipes[elf1] + recipes[elf2]
+        if new_score >= 10:
+            recipes.append(new_score // 10)
+        recipes.append(new_score % 10)
+        elf1 = (elf1 + recipes[elf1] + 1) % len(recipes)
+        elf2 = (elf2 + recipes[elf2] + 1) % len(recipes)
+
+    return ''.join(str(d) for d in recipes[recipes_after:recipes_after + 10])
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(sequence: int) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Finds how many recipes appear on the scoreboard to the left of the given sequence.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        sequence (int): The sequence to search for.
 
     Returns:
-        int: The result for part two.
+        int: The number of recipes to the left of the first appearance of the sequence.
     """
-    # TODO: Implement part two logic
-    return 0
+    seq_str = str(sequence)
+    seq_len = len(seq_str)
+    recipes = [3, 7]
+    elf1, elf2 = 0, 1
+
+    while True:
+        new_score = recipes[elf1] + recipes[elf2]
+        if new_score >= 10:
+            recipes.append(new_score // 10)
+            if ''.join(str(d) for d in recipes[-seq_len:]) == seq_str:
+                return len(recipes) - seq_len
+        recipes.append(new_score % 10)
+        if ''.join(str(d) for d in recipes[-seq_len:]) == seq_str:
+            return len(recipes) - seq_len
+
+        elf1 = (elf1 + recipes[elf1] + 1) % len(recipes)
+        elf2 = (elf2 + recipes[elf2] + 1) % len(recipes)
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_value = get_input("inputs/14_input.txt")
 
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    print(f"Part 1: {part_one(input_value)}")
+    print(f"Part 2: {part_two(input_value)}")

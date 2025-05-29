@@ -1,10 +1,12 @@
 # pylint: disable=line-too-long
 """
-Part 1: 
-Answer: 
+Day 11: Hex Ed
 
-Part 2: 
-Answer: 
+Part 1: Determine the fewest number of steps required to reach the child.
+Answer: 707
+
+Part 2: How many steps away is the furthest he ever got from his starting position?
+Answer: 1442
 """
 
 from typing import List
@@ -13,54 +15,79 @@ from utils import profiler
 
 def get_input(file_path: str) -> List[str]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and returns a list of steps in the hex grid.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        List[str]: List of directions as strings.
     """
     with open(file_path, "r", encoding="utf-8") as file:
-        for line in file:
-            line = line.strip()
+        line = file.readline().strip()
+        return line.split(',')
 
-    return file
+
+def hex_distance(x: int, y: int, z: int) -> int:
+    """
+    Computes distance from origin in cube coordinates for hex grid.
+
+    Args:
+        x (int): x coordinate.
+        y (int): y coordinate.
+        z (int): z coordinate.
+
+    Returns:
+        int: Distance from origin.
+    """
+    return max(abs(x), abs(y), abs(z))
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def compute(data_input: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Computes shortest path distance from origin after following steps.
+    Computes the furthest distance from origin during the path.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): List of directions.
 
     Returns:
-        int: The result for part one.
+        int: Distance from origin.
+        int: Furthest distance reached.
     """
-    # TODO: Implement part one logic
-    return 0
+    x = y = z = 0
+    max_dist = 0
 
+    for step in data_input:
+        if step == 'n':
+            y += 1
+            z -= 1
+        elif step == 'ne':
+            x += 1
+            z -= 1
+        elif step == 'se':
+            x += 1
+            y -= 1
+        elif step == 's':
+            y -= 1
+            z += 1
+        elif step == 'sw':
+            x -= 1
+            z += 1
+        elif step == 'nw':
+            x -= 1
+            y += 1
 
-@profiler
-def part_two(data_input: List[str]) -> int:
-    """
-    Solves part two of the problem using the provided input data.
+        max_dist = max(hex_distance(x, y, z), max_dist)
 
-    Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
-
-    Returns:
-        int: The result for part two.
-    """
-    # TODO: Implement part two logic
-    return 0
+    return hex_distance(x, y, z), max_dist
 
 
 if __name__ == "__main__":
-    # Get input data
-    input_data = get_input("inputs/XX_input.txt")
+    input_data = get_input("inputs/11_input.txt")
 
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    fewest_steps, max_distance = compute(input_data)
+
+    print(f"Part 1: {fewest_steps}")
+    print(f"Part 2: {max_distance}")
