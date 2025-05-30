@@ -9,52 +9,42 @@ Part 2: Now, take the signal you got on wire a, override wire b to that signal, 
 Answer: 2797
 """
 
-from typing import List, Dict
+from typing import Dict
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> Dict[str, str]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and parses circuit instructions into a dictionary mapping wire names to expressions.
+
+    Each line has the format: 'expression -> wire'
+    For example: '123 -> x' or 'x AND y -> z'
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file]
-
-
-def parse_instructions(lines: List[str]) -> Dict[str, str]:
-    """
-    Parses circuit instructions into a dictionary mapping wire names to expressions.
-
-    Args:
-        lines (List[str]): List of raw instruction strings.
-
-    Returns:
-        Dict[str, str]: Mapping from wire name to logic expression.
+        Dict[str, str]: A dictionary mapping each wire to its logic expression.
     """
     instructions = {}
-    for line in lines:
-        expr, wire = line.split(" -> ")
-        instructions[wire] = expr
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            expr, wire = line.strip().split(" -> ")
+            instructions[wire] = expr
     return instructions
 
 
 def get_value(wire: str, instructions: Dict[str, str], cache: Dict[str, int]) -> int:
     """
-    Recursively evaluates the value of a wire.
+    Recursively evaluates the 16-bit signal provided to a wire, using memoization.
 
     Args:
         wire (str): The wire to evaluate.
-        instructions (Dict[str, str]): Dictionary of wire instructions.
-        cache (Dict[str, int]): Memoization cache for wire values.
+        instructions (Dict[str, str]): Mapping of wires to logic expressions.
+        cache (Dict[str, int]): A memoization cache to store evaluated wire values.
 
     Returns:
-        int: The evaluated 16-bit signal of the wire.
+        int: The computed signal value for the given wire.
     """
     if wire.isdigit():
         return int(wire)
@@ -67,10 +57,8 @@ def get_value(wire: str, instructions: Dict[str, str], cache: Dict[str, int]) ->
 
     if len(tokens) == 1:
         val = get_value(tokens[0], instructions, cache)
-
-    elif len(tokens) == 2:  # NOT
+    elif len(tokens) == 2:  # NOT x
         val = ~get_value(tokens[1], instructions, cache) & 0xFFFF
-
     elif len(tokens) == 3:
         a, op, b = tokens
         if op == "AND":
@@ -91,32 +79,33 @@ def get_value(wire: str, instructions: Dict[str, str], cache: Dict[str, int]) ->
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(instructions: Dict[str, str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Evaluates the final signal provided to wire 'a' by recursively computing
+    the logic circuit defined by the input instructions.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        instructions (Dict[str, str]): Mapping of wire names to logic expressions.
 
     Returns:
-        int: The result for part one.
+        int: The signal ultimately provided to wire 'a'.
     """
-    instructions = parse_instructions(data_input)
     return get_value("a", instructions, {})
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(instructions: Dict[str, str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    First, computes the value of wire 'a' from the original instructions.
+    Then, overrides the value of wire 'b' with that result, resets the cache,
+    and re-evaluates wire 'a'.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        instructions (Dict[str, str]): Mapping of wire names to logic expressions.
 
     Returns:
-        int: The result for part two.
+        int: The new signal provided to wire 'a' after overriding wire 'b'.
     """
-    instructions = parse_instructions(data_input)
     override = get_value("a", instructions, {})
     cache = {"b": override}
     return get_value("a", instructions, cache)

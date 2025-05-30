@@ -15,13 +15,16 @@ from utils import profiler
 
 def get_input(file_path: str) -> str:
     """
-    Reads the input file and returns the polymer string.
+    Reads the polymer data from a text file.
+
+    Opens the specified file, reads its entire content, strips any trailing 
+    whitespace including newlines, and returns the polymer as a single string.
 
     Args:
-        file_path (str): Path to the input text file.
+        file_path (str): Path to the input text file containing the polymer data.
 
     Returns:
-        str: The polymer string.
+        str: The raw polymer string extracted from the file.
     """
     with open(file_path, "r", encoding="utf-8") as file:
         return file.read().strip()
@@ -29,13 +32,17 @@ def get_input(file_path: str) -> str:
 
 def react_polymer(polymer: str) -> str:
     """
-    Reacts the polymer by removing adjacent units of opposite polarity.
+    Processes the polymer by iteratively reacting adjacent units that are 
+    the same type but opposite polarity, removing them until no more reactions occur.
+
+    A reaction occurs when two adjacent characters differ only by case 
+    (e.g., 'a' and 'A'). These units annihilate each other and are removed.
 
     Args:
-        polymer (str): The polymer string.
+        polymer (str): The input polymer string to be reacted.
 
     Returns:
-        str: The reacted polymer string.
+        str: The fully reacted polymer string with no further reactions possible.
     """
     stack = []
     for unit in polymer:
@@ -49,13 +56,16 @@ def react_polymer(polymer: str) -> str:
 @profiler
 def part_one(data_input: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Calculates the length of the fully reacted polymer for Part 1.
+
+    Extracts the polymer string from input, reacts it fully using `react_polymer`, 
+    and returns the length of the resulting polymer.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): List of input lines; expects the polymer string as the first item.
 
     Returns:
-        int: The result for part one.
+        int: Length of the polymer after fully reacting all units.
     """
     polymer = data_input[0]
     reacted_polymer = react_polymer(polymer)
@@ -65,13 +75,18 @@ def part_one(data_input: List[str]) -> int:
 @profiler
 def part_two(data_input: List[str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Finds the length of the shortest polymer obtainable by removing all units of 
+    exactly one type (case-insensitive) and then fully reacting the result.
+
+    For each letter in the alphabet, removes all occurrences (both uppercase and lowercase) 
+    from the original polymer, reacts the resulting polymer, and tracks the shortest length 
+    encountered.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        data_input (List[str]): List of input lines; expects the polymer string as the first item.
 
     Returns:
-        int: The result for part two.
+        int: The length of the shortest polymer after removing one unit type and reacting.
     """
     polymer = data_input[0]
     min_length = len(polymer)

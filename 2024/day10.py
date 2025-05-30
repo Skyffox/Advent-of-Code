@@ -60,7 +60,7 @@ def follow_path(grid: List[List[int]], x: int, y: int, previous: int, path_ends:
         grid (list): The grid representing the terrain.
         x (int): The current x-coordinate.
         y (int): The current y-coordinate.
-        previous (tuple[int, int]): The coordinates of the previous cell, used to check the difference in values.
+        previous (int): The value of the previous cell, used to check the difference in values.
         path_ends (list): A list that stores the coordinates of the endpoints that are reached during the traversal.
     """
     if not within_grid(x, y, len(grid[0]), len(grid)):
@@ -77,54 +77,38 @@ def follow_path(grid: List[List[int]], x: int, y: int, previous: int, path_ends:
 
 
 @profiler
-def part_one(grid: List[List[int]], start_points: List[Tuple[int, int]]) -> int:
+def combined_part(grid: List[List[int]], start_points: List[Tuple[int, int]]) -> Tuple[int, int]:
     """
-    For each starting point, the function finds all the endpoints it can reach by following the path, and the score
-    for each starting point is the number of unique endpoints it can reach. The function then returns the sum of all
-    the scores.
+    Calculates both parts in one pass:
+      - Part 1: sum of unique endpoints reachable per start.
+      - Part 2: sum of total endpoints reachable per start (counting duplicates).
 
     Args:
         grid (list): The grid representing the terrain.
-        start_points (list): A list of tuples representing the starting points in the grid.
+        start_points (list): List of starting point coordinates.
 
     Returns:
-        int: The sum of the scores for all starting points, where the score is the number of unique endpoints that
-            can be reached from each starting point.
+        tuple: (part1_result, part2_result)
     """
-    score_unique = []
+    sum_unique_endpoints = 0
+    sum_total_endpoints = 0
+
     for x, y in start_points:
         path_ends = []
         follow_path(grid, x, y, -1, path_ends)
-        score_unique.append(len(set(path_ends)))
 
-    return sum(score_unique)
+        # Part 1: count unique endpoints reached
+        sum_unique_endpoints += len(set(path_ends))
 
+        # Part 2: count all endpoints reached (including duplicates)
+        sum_total_endpoints += len(path_ends)
 
-@profiler
-def part_two(grid: List[List[int]], start_points: List[Tuple[int, int]]) -> int:
-    """
-    For each starting point, the function finds all the endpoints it can reach, and the rating for each starting point
-    is the total number of times it can reach an endpoint. The function then returns the sum of all the ratings.
-
-    Args:
-        grid (list): The grid representing the terrain.
-        start_points (list): A list of tuples representing the starting points in the grid.
-
-    Returns:
-        int: The sum of the ratings for all starting points, where the rating is the number of times each starting point
-            can reach an endpoint.
-    """
-    score_rating = []
-    for x, y in start_points:
-        path_ends = []
-        follow_path(grid, x, y, -1, path_ends)
-        score_rating.append(len(path_ends))
-
-    return sum(score_rating)
+    return sum_unique_endpoints, sum_total_endpoints
 
 
 if __name__ == "__main__":
     input_data, trailheads = get_input("inputs/10_input.txt")
 
-    print(f"Part 1: {part_one(input_data, trailheads)}")
-    print(f"Part 2: {part_two(input_data, trailheads)}")
+    part1, part2 = combined_part(input_data, trailheads)
+    print(f"Part 1: {part1}")
+    print(f"Part 2: {part2}")

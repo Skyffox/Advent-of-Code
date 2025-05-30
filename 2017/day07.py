@@ -14,56 +14,44 @@ from typing import List, Dict, Tuple
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> Tuple[Dict[str, int], Dict[str, List[str]]]:
     """
-    Reads the input file and returns a list of lines describing programs.
+    Reads and parses the input file to extract program weights and their children.
+
+    Each line has the format:
+        program_name (weight) -> child1, child2, ...
+    or
+        program_name (weight)
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        List[str]: List of program description lines.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file]
-
-
-def parse_programs(lines: List[str]) -> Tuple[Dict[str, int], Dict[str, List[str]]]:
-    """
-    Parses program weights and children from input lines.
-
-    Args:
-        lines (List[str]): Input lines describing programs.
-
-    Returns:
         Tuple:
-            weights (Dict[str, int]): Program name to weight.
-            children (Dict[str, List[str]]): Program name to list of child programs.
+            weights (Dict[str, int]): Mapping of program name to its weight.
+            children (Dict[str, List[str]]): Mapping of program name to list of children.
     """
     weights, children = {}, {}
     pattern = re.compile(r"(\w+)\s+\((\d+)\)(?:\s+->\s+([\w\s,]+))?")
-    for line in lines:
-        match = pattern.match(line)
-        if match:
-            name, weight, kids = match.groups()
-            weights[name] = int(weight)
-            if kids is not None:
-                children[name] = [k.strip() for k in kids.split(",")]
-            else:
-                children[name] = []
-
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            match = pattern.match(line.strip())
+            if match:
+                name, weight, kids = match.groups()
+                weights[name] = int(weight)
+                children[name] = [k.strip() for k in kids.split(",")] if kids else []
     return weights, children
 
 
 def find_root(children: Dict[str, List[str]]) -> str:
     """
-    Finds the root program (the one not listed as child).
+    Finds the root program — the one that is not anyone's child.
 
     Args:
-        children (Dict[str, List[str]]): Program children map.
+        children (Dict[str, List[str]]): Mapping of program names to their children.
 
     Returns:
-        str: The root program name.
+        str: Name of the root program.
     """
     all_nodes = set(children.keys())
     child_nodes = {c for kids in children.values() for c in kids}
@@ -71,98 +59,99 @@ def find_root(children: Dict[str, List[str]]) -> str:
     return root
 
 
-def compute_weight(name: str, weights: Dict[str, int], children: Dict[str, List[str]], memo: Dict[str, int]) -> int:
-    """
-    Recursively computes total weight of a program including children.
-
-    Args:
-        name (str): Program name.
-        weights (Dict[str, int]): Program weights.
-        children (Dict[str, List[str]]): Program children.
-        memo (Dict[str, int]): Memoization dict.
-
-    Returns:
-        int: Total weight of program.
-    """
-    if name in memo:
-        return memo[name]
-    total = weights[name] + sum(compute_weight(c, weights, children, memo) for c in children[name])
-    memo[name] = total
-    return total
-
-
-def find_unbalance(name: str, weights: Dict[str, int], children: Dict[str, List[str]]) -> int:
-    """
-    Finds the corrected weight to balance the tower.
-
-    Args:
-        name (str): Root program name.
-        weights (Dict[str, int]): Program weights.
-        children (Dict[str, List[str]]): Program children.
-
-    Returns:
-        int: Corrected weight for unbalanced program.
-    """
-    memo = {}
-
-    def helper(node: str) -> Tuple[int, int]:
-        # returns (total_weight, corrected_weight or 0 if none)
-        child_weights = [compute_weight(c, weights, children, memo) for c in children[node]]
-        weight_counts = {}
-        for w in child_weights:
-            weight_counts[w] = weight_counts.get(w, 0) + 1
-
-        if len(weight_counts) <= 1:
-            return weights[node] + sum(child_weights), 0
-
-        # Find the unbalanced weight and the balanced weight
-        correct_weight = max(weight_counts, key=weight_counts.get)
-        wrong_weight = min(weight_counts, key=weight_counts.get)
-
-        # Find which child is unbalanced
-        for c, w in zip(children[node], child_weights):
-            if w == wrong_weight:
-                _, correction = helper(c)
-                if correction != 0:
-                    return 0, correction
-                # Calculate the weight adjustment needed
-                diff = correct_weight - wrong_weight
-                return 0, weights[c] + diff
-        return 0, 0
-
-    _, corrected = helper(name)
-    return corrected
-
-
 @profiler
-def part_one(data_input: List[str]) -> str:
+def part_one(data: Tuple[Dict[str, int], Dict[str, List[str]]]) -> str:
     """
-    Finds the bottom program name.
+    Identifies the bottom program (root) of the tower.
 
     Args:
-        data_input (List[str]): Input lines.
+        data (Tuple): Parsed input consisting of:
+            - weights: Mapping of program names to their weights.
+            - children: Mapping of program names to list of children.
 
     Returns:
-        str: Bottom program name.
+        str: The name of the bottom program.
     """
-    _, children = parse_programs(data_input)
+    _, children = data
     return find_root(children)
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(data: Tuple[Dict[str, int], Dict[str, List[str]]]) -> int:
     """
-    Finds the corrected weight to balance the tower.
+    Determines the corrected weight of the single unbalanced program to balance the entire tower.
+
+    Uses recursion and memoization to:
+    - Compute total weights of each subtree.
+    - Detect imbalance among siblings.
+    - Calculate required weight adjustment for the unbalanced program.
 
     Args:
-        data_input (List[str]): Input lines.
+        data (Tuple): Parsed input consisting of:
+            - weights: Mapping of program names to their weights.
+            - children: Mapping of program names to list of children.
 
     Returns:
-        int: Corrected weight.
+        int: The corrected weight to balance the tower.
     """
-    weights, children = parse_programs(data_input)
+    weights, children = data
     root = find_root(children)
-    return find_unbalance(root, weights, children)
+    memo = {}
+
+    def compute_weight(name: str) -> int:
+        """
+        Recursively compute total weight of a program including its children.
+
+        Uses memoization to avoid redundant computations.
+        """
+        if name in memo:
+            return memo[name]
+        total = weights[name] + sum(compute_weight(c) for c in children[name])
+        memo[name] = total
+        return total
+
+    def find_unbalance(node: str) -> int:
+        """
+        Recursively traverses the tower to find the unbalanced program.
+
+        Steps:
+        1. Compute total weights of all children.
+        2. Count occurrences of each child's total weight.
+        3. If all weights match, this node is balanced; return 0.
+        4. Otherwise, identify the unique (wrong) weight and the correct weight.
+        5. Recursively check which child has the wrong weight.
+        6. When the unbalanced program is found, calculate the corrected weight
+           by adjusting it based on the difference between correct and wrong weights.
+        """
+        child_weights = [compute_weight(c) for c in children[node]]
+        # Count how many children have each weight
+        weight_counts = {}
+        for w in child_weights:
+            weight_counts[w] = weight_counts.get(w, 0) + 1
+
+        # If all children have the same total weight, this node is balanced
+        if len(weight_counts) <= 1:
+            return 0 # balanced, no correction needed here
+
+        # Identify the correct weight (the one appearing most often)
+        correct_weight = max(weight_counts, key=weight_counts.get)
+        # Identify the wrong weight (the one appearing least often)
+        wrong_weight = min(weight_counts, key=weight_counts.get)
+
+        # Find which child has the wrong weight and check deeper
+        for c, w in zip(children[node], child_weights):
+            if w == wrong_weight:
+                # Recurse down to see if the imbalance is deeper
+                correction = find_unbalance(c)
+                if correction != 0:
+                    return correction # found deeper unbalance, propagate up
+                # Calculate and return the corrected weight for the unbalanced program
+                diff = correct_weight - wrong_weight
+                return weights[c] + diff
+
+        return 0 # fallback, should never reach here if tree is unbalanced
+
+    return find_unbalance(root)
 
 
 if __name__ == "__main__":

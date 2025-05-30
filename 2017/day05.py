@@ -15,17 +15,17 @@ from utils import profiler
 
 def get_input(file_path: str) -> List[int]:
     """
-    Jumps are relative: -1 moves to the previous instruction, and 2 skips the next one. 
-    Start at the first instruction in the list. The goal is to follow the jumps until one leads outside the list.
+    Reads a list of integer jump offsets from a file.
 
-    In addition, these instructions are a little strange; after each jump, the offset of that instruction increases by 1. 
-    So, if you come across an offset of 3, you would move three instructions forward, but change it to a 4 for the next time it is encountered.
+    Each integer represents a relative jump offset in a list of instructions.
+    Starting at the first instruction (index 0), these offsets determine
+    how to move through the list by adding the offset to the current index.
 
     Args:
-        file_path (str): Path to the input text file.
+        file_path (str): Path to the input file containing one integer offset per line.
 
     Returns:
-        List[int]: List of jump offsets.
+        List[int]: List of integer offsets representing jump instructions.
     """
     with open(file_path, "r", encoding="utf-8") as file:
         return [int(line.strip()) for line in file]
@@ -34,15 +34,21 @@ def get_input(file_path: str) -> List[int]:
 @profiler
 def part_one(data_input: List[int]) -> int:
     """
-    Counts steps to exit the list following the jumping rules for part one.
-    Now, the jumps are even stranger: after each jump, if the offset was three or more, 
-    instead decrease it by 1. Otherwise, increase it by 1 as before.
+    Simulates following jump offsets through the list until moving outside it,
+    counting the number of steps taken.
+
+    Rules:
+    - Begin at index 0.
+    - At each step, read the current jump offset.
+    - Move forward or backward by the offset value.
+    - After the jump, increment the offset at the previous position by 1.
+    - Repeat until the current position moves outside the list bounds.
 
     Args:
-        data_input (List[int]): List of jump offsets.
+        data_input (List[int]): Initial list of jump offsets.
 
     Returns:
-        int: Number of steps to exit the list.
+        int: The total number of steps taken to exit the list.
     """
     jumps = data_input.copy()
     steps = 0
@@ -60,13 +66,23 @@ def part_one(data_input: List[int]) -> int:
 @profiler
 def part_two(data_input: List[int]) -> int:
     """
-    Counts steps to exit the list with modified jumping rules for part two.
+    Simulates following jump offsets through the list with modified update rules,
+    counting steps until exiting the list.
+
+    Modified rules differ from part one:
+    - Begin at index 0.
+    - At each step, read the current jump offset.
+    - Move forward or backward by the offset value.
+    - After the jump:
+        - If the original offset was 3 or more, decrease it by 1.
+        - Otherwise, increase it by 1.
+    - Repeat until the current position moves outside the list bounds.
 
     Args:
-        data_input (List[int]): List of jump offsets.
+        data_input (List[int]): Initial list of jump offsets.
 
     Returns:
-        int: Number of steps to exit the list.
+        int: The total number of steps taken to exit the list.
     """
     jumps = data_input.copy()
     steps = 0

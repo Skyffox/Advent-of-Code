@@ -2,71 +2,66 @@
 """
 Day 15: Science for Hungry People
 
-Part 1: Given the ingredients in your kitchen and their properties, what is the total score of the highest-scoring cookie you can make?
+Part 1: Given the ingredients in your kitchen and their properties,
+        what is the total score of the highest-scoring cookie you can make?
 Answer: 18965440
 
-Part 2: Given the ingredients in your kitchen and their properties, what is the total score of the highest-scoring cookie you can make with a calorie total of 500?
+Part 2: Given the ingredients in your kitchen and their properties,
+        what is the total score of the highest-scoring cookie you can make
+        with a calorie total of 500?
 Answer: 15862900
 """
 
-from typing import List, Dict, Tuple
+from typing import Dict, Tuple
 import re
 import itertools
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def load_ingredients(file_path: str) -> Dict[str, Dict[str, int]]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file, parses the ingredient properties, and returns a mapping.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file]
-
-
-def parse_ingredients(data: List[str]) -> Dict[str, Dict[str, int]]:
-    """
-    Parses ingredient properties.
-
-    Args:
-        data (List[str]): Lines describing ingredients.
-
-    Returns:
-        Dict[str, Dict[str, int]]: Mapping from ingredient name to property dict.
+        Dict[str, Dict[str, int]]: Mapping from ingredient name to its properties,
+            including capacity, durability, flavor, texture, and calories.
     """
     pattern = re.compile(
         r"(\w+): capacity (-?\d+), durability (-?\d+), flavor (-?\d+), texture (-?\d+), calories (-?\d+)"
     )
     ingredients = {}
-    for line in data:
-        match = pattern.match(line)
-        if match:
-            name, capacity, durability, flavor, texture, calories = match.groups()
-            ingredients[name] = {
-                "capacity": int(capacity),
-                "durability": int(durability),
-                "flavor": int(flavor),
-                "texture": int(texture),
-                "calories": int(calories),
-            }
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            match = pattern.match(line)
+            if match:
+                name, capacity, durability, flavor, texture, calories = match.groups()
+                ingredients[name] = {
+                    "capacity": int(capacity),
+                    "durability": int(durability),
+                    "flavor": int(flavor),
+                    "texture": int(texture),
+                    "calories": int(calories),
+                }
     return ingredients
 
 
 def score_recipe(ingredients: Dict[str, Dict[str, int]], amounts: Tuple[int, ...]) -> int:
     """
-    Calculates the total score for a recipe given ingredient amounts.
+    Calculates the total cookie score for a given distribution of ingredient amounts.
+
+    The score is the product of the sums of each property (capacity, durability,
+    flavor, texture), where any negative sums are treated as zero.
 
     Args:
-        ingredients (Dict[str, Dict[str, int]]): Ingredient properties.
-        amounts (Tuple[int, ...]): Amounts for each ingredient.
+        ingredients (Dict[str, Dict[str, int]]): Mapping of ingredient properties.
+        amounts (Tuple[int, ...]): Amounts of each ingredient used (in teaspoons).
 
     Returns:
-        int: Total score (product of summed properties, min 0).
+        int: The total score of the cookie.
     """
     properties = ["capacity", "durability", "flavor", "texture"]
     totals = {prop: 0 for prop in properties}
@@ -86,14 +81,14 @@ def score_recipe(ingredients: Dict[str, Dict[str, int]], amounts: Tuple[int, ...
 
 def calories_count(ingredients: Dict[str, Dict[str, int]], amounts: Tuple[int, ...]) -> int:
     """
-    Calculates total calories for a recipe.
+    Calculates the total calories of a cookie given ingredient amounts.
 
     Args:
-        ingredients (Dict[str, Dict[str, int]]): Ingredient properties.
-        amounts (Tuple[int, ...]): Amounts for each ingredient.
+        ingredients (Dict[str, Dict[str, int]]): Mapping of ingredient properties.
+        amounts (Tuple[int, ...]): Amounts of each ingredient used.
 
     Returns:
-        int: Total calories.
+        int: Total calorie count of the cookie.
     """
     total_calories = 0
     for amount, (_, props) in zip(amounts, ingredients.items()):
@@ -102,21 +97,25 @@ def calories_count(ingredients: Dict[str, Dict[str, int]], amounts: Tuple[int, .
 
 
 @profiler
-def compute(data_input: List[str]) -> Tuple[int, int]:
+def compute(file_path: str) -> Tuple[int, int]:
     """
-    Finds the highest scoring cookie (total teaspoons = 100).
+    Finds the highest scoring cookie recipes for two cases:
+    1. Highest total score using exactly 100 teaspoons of ingredients.
+    2. Highest total score using exactly 100 teaspoons of ingredients with total calories = 500.
 
     Args:
-        data_input (List[str]): Input lines describing ingredients.
+        file_path (str): Path to the input file describing ingredient properties.
 
     Returns:
-        int: Highest total score.
+        Tuple[int, int]: 
+            - Highest score without calorie restriction (Part 1).
+            - Highest score with calorie restriction (Part 2).
     """
-    ingredients = parse_ingredients(data_input)
+    ingredients = load_ingredients(file_path)
     n = len(ingredients)
     max_score_1, max_score_2 = 0, 0
 
-    # Generate all combinations of amounts summing to 100
+    # Generate all combinations of ingredient amounts summing to 100 teaspoons
     for amounts in itertools.product(range(101), repeat=n):
         if sum(amounts) == 100:
             score = score_recipe(ingredients, amounts)
@@ -130,9 +129,7 @@ def compute(data_input: List[str]) -> Tuple[int, int]:
 
 
 if __name__ == "__main__":
-    input_data = get_input("inputs/15_input.txt")
-
-    part1, part2 = compute(input_data)
+    part1, part2 = compute("inputs/15_input.txt")
 
     print(f"Part 1: {part1}")
     print(f"Part 2: {part2}")

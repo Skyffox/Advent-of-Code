@@ -45,7 +45,11 @@ def manhattan_distance(p1: Tuple[int, int], p2: Tuple[int, int]) -> int:
 @profiler
 def part_one(data_input: List[Tuple[int, int]]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Finds the size of the largest finite area closest to the given coordinates.
+
+    Each location in the grid is assigned to the closest coordinate by Manhattan distance.
+    Locations equidistant to multiple coordinates are not assigned.
+    Areas that extend infinitely (touching the bounding box edges) are excluded.
 
     Args:
         data_input (List[tuple[int, int]]): A list of coordinates.
@@ -86,15 +90,15 @@ def part_one(data_input: List[Tuple[int, int]]) -> int:
 @profiler
 def part_two(data_input: List[Tuple[int, int]], max_distance: int = 10000) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Computes the size of the region containing all locations with total Manhattan
+    distance to all given coordinates less than max_distance.
 
     Args:
         data_input (List[tuple[int, int]]): A list of coordinates.
         max_distance (int): The maximum total distance to consider.
 
     Returns:
-        int: The size of the region containing all locations which have a total distance
-             to all given coordinates of less than max_distance.
+        int: The size of the region meeting the distance criterion.
     """
     # Determine the bounding box of the coordinates
     min_x = min(x for x, _ in data_input)
@@ -118,7 +122,6 @@ def part_two(data_input: List[Tuple[int, int]], max_distance: int = 10000) -> in
 
 
 if __name__ == "__main__":
-    # Get input data
     input_data = get_input("inputs/6_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")

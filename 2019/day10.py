@@ -16,31 +16,23 @@ from collections import defaultdict
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_and_parse_asteroids(file_path: str) -> List[Tuple[int, int]]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and parses the asteroid map into a list of asteroid coordinates.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file if line.strip()]
-
-
-def parse_asteroids(map_data: List[str]) -> List[Tuple[int, int]]:
-    """
-    Parses the map into a list of asteroid coordinates.
-
-    Args:
-        map_data (List[str]): The map input.
-
-    Returns:
         List[Tuple[int, int]]: List of (x, y) asteroid coordinates.
     """
-    return [(x, y) for y, line in enumerate(map_data) for x, ch in enumerate(line) if ch == '#']
+    with open(file_path, "r", encoding="utf-8") as file:
+        return [
+            (x, y)
+            for y, line in enumerate(file)
+            for x, ch in enumerate(line.strip())
+            if ch == '#'
+        ]
 
 
 def angle_between(source: Tuple[int, int], target: Tuple[int, int]) -> float:
@@ -61,7 +53,7 @@ def angle_between(source: Tuple[int, int], target: Tuple[int, int]) -> float:
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(asteroids: List[str]) -> int:
     """
     Solves part one of the problem using the provided input data.
 
@@ -71,7 +63,6 @@ def part_one(data_input: List[str]) -> int:
     Returns:
         int: The result for part one.
     """
-    asteroids = parse_asteroids(data_input)
     max_visible = 0
 
     for base in asteroids:
@@ -82,7 +73,7 @@ def part_one(data_input: List[str]) -> int:
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(asteroids: List[str]) -> int:
     """
     Solves part two of the problem using the provided input data.
 
@@ -92,8 +83,6 @@ def part_two(data_input: List[str]) -> int:
     Returns:
         int: The result for part two (the ID of the 200th vaporized asteroid).
     """
-    asteroids = parse_asteroids(data_input)
-
     # Step 1: Find best base location
     best_base = None
     max_visible = 0
@@ -133,7 +122,7 @@ def part_two(data_input: List[str]) -> int:
 
 
 if __name__ == "__main__":
-    input_data = get_input("inputs/10_input.txt")
+    input_data = get_and_parse_asteroids("inputs/10_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

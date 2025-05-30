@@ -28,7 +28,6 @@ def get_input(file_path: str) -> List[int]:
         return list(map(int, file.read().strip().split(",")))
 
 
-
 @profiler
 def run_boost_diagnostic(program: List[int], input_value: int) -> int:
     """

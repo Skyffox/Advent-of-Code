@@ -14,48 +14,38 @@ import itertools
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> Dict[Tuple[str, str], int]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Parses a distance map from the input file, where each line is formatted like:
+        "A to B = 42"
+
+    Distances are bidirectional, so both (A, B) and (B, A) are added.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file]
-
-
-def parse_distances(data: List[str]) -> Dict[Tuple[str, str], int]:
-    """
-    Parses distance instructions into a dictionary of location pairs and distances.
-
-    Args:
-        data (List[str]): List of strings in the form "A to B = 42".
-
-    Returns:
-        Dict[Tuple[str, str], int]: Mapping of (location1, location2) to distance.
+        Dict[Tuple[str, str], int]: Dictionary mapping location pairs to distances.
     """
     distances = {}
-    for line in data:
-        parts = line.split()
-        loc1, loc2, dist = parts[0], parts[2], int(parts[4])
-        distances[(loc1, loc2)] = dist
-        distances[(loc2, loc1)] = dist # Since distances are bidirectional
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            parts = line.strip().split()
+            loc1, loc2, dist = parts[0], parts[2], int(parts[4])
+            distances[(loc1, loc2)] = dist
+            distances[(loc2, loc1)] = dist
     return distances
 
 
 def get_locations(distances: Dict[Tuple[str, str], int]) -> List[str]:
     """
-    Returns a list of all unique locations from the distance dictionary.
+    Extracts all unique locations from the distance mapping.
 
     Args:
-        distances (Dict[Tuple[str, str], int]): Distance mapping.
+        distances (Dict[Tuple[str, str], int]): Dictionary of bidirectional distances.
 
     Returns:
-        List[str]: List of unique city names.
+        List[str]: List of unique location names.
     """
     locations = set()
     for a, b in distances:
@@ -66,49 +56,47 @@ def get_locations(distances: Dict[Tuple[str, str], int]) -> List[str]:
 
 def route_distance(route: List[str], distances: Dict[Tuple[str, str], int]) -> int:
     """
-    Calculates the total distance of a given route.
+    Computes the total distance for a given travel route.
 
     Args:
-        route (List[str]): Ordered list of locations.
-        distances (Dict[Tuple[str, str], int]): Distance mapping.
+        route (List[str]): Ordered list of locations in the route.
+        distances (Dict[Tuple[str, str], int]): Mapping of location pairs to distances.
 
     Returns:
-        int: Total distance of the route.
+        int: The total travel distance of the route.
     """
     return sum(distances[(route[i], route[i + 1])] for i in range(len(route) - 1))
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(distances: Dict[Tuple[str, str], int]) -> int:
     """
-    Finds the shortest route that visits every location once.
+    Finds the shortest route that visits every location exactly once using brute-force
+    permutation of all possible paths.
 
     Args:
-        data_input (List[str]): A list of input lines.
+        distances (Dict[Tuple[str, str], int]): Distance mapping between all location pairs.
 
     Returns:
-        int: The minimum total distance of any valid route.
+        int: The shortest possible route distance.
     """
-    distances = parse_distances(data_input)
     locations = get_locations(distances)
-
     return min(route_distance(p, distances) for p in itertools.permutations(locations))
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(distances: Dict[Tuple[str, str], int]) -> int:
     """
-    Finds the longest route that visits every location once.
+    Finds the longest route that visits every location exactly once using brute-force
+    permutation of all possible paths.
 
     Args:
-        data_input (List[str]): A list of input lines.
+        distances (Dict[Tuple[str, str], int]): Distance mapping between all location pairs.
 
     Returns:
-        int: The maximum total distance of any valid route.
+        int: The longest possible route distance.
     """
-    distances = parse_distances(data_input)
     locations = get_locations(distances)
-
     return max(route_distance(p, distances) for p in itertools.permutations(locations))
 
 

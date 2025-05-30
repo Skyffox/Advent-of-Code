@@ -10,57 +10,29 @@ Part 2: What is the minimum number of orbital transfers required to move from th
 Answer: 451
 """
 
-from typing import List, Dict
+from typing import Dict, List
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def load_orbit_map(file_path: str) -> Dict[str, str]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file, parses orbit pairs, and builds the orbit map.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file if line.strip()]
-
-
-def build_orbit_map(pairs: List[str]) -> Dict[str, str]:
-    """
-    Builds a dictionary representing the orbit map.
-
-    Args:
-        pairs (List[str]): A list of orbit relationships in the form "A)B".
-
-    Returns:
         Dict[str, str]: A map from object to the object it orbits.
     """
     orbit_map = {}
-    for pair in pairs:
-        center, orbiter = pair.split(")")
-        orbit_map[orbiter] = center
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if not line:
+                continue
+            center, orbiter = line.split(")")
+            orbit_map[orbiter] = center
     return orbit_map
-
-
-def count_orbits(orbit_map: Dict[str, str]) -> int:
-    """
-    Counts total direct and indirect orbits.
-
-    Args:
-        orbit_map (Dict[str, str]): The orbit relationships.
-
-    Returns:
-        int: The total number of orbits.
-    """
-    total = 0
-    for obj in orbit_map:
-        while obj in orbit_map:
-            obj = orbit_map[obj]
-            total += 1
-    return total
 
 
 def get_orbit_path(orbit_map: Dict[str, str], start: str) -> List[str]:
@@ -82,32 +54,41 @@ def get_orbit_path(orbit_map: Dict[str, str], start: str) -> List[str]:
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(orbit_map: Dict[str, str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Counts total direct and indirect orbits.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        orbit_map (Dict[str, str]): The orbit relationships.
 
     Returns:
-        int: The result for part one.
+        int: The total number of orbits.
     """
-    orbit_map = build_orbit_map(data_input)
-    return count_orbits(orbit_map)
+    total = 0
+    for obj in orbit_map:
+        while obj in orbit_map:
+            obj = orbit_map[obj]
+            total += 1
+    return total
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(orbit_map: Dict[str, str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Calculates the minimum number of orbital transfers required to move from the object 
+    YOU are orbiting to the object SAN is orbiting.
+
+    The function finds the paths from YOU and SAN to the root object ("COM"), identifies 
+    their common ancestors, and determines the shortest combined distance to a shared 
+    orbiting object.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        orbit_map (Dict[str, str]): A dictionary mapping each orbiting object to the object 
+                                    it orbits.
 
     Returns:
-        int: The result for part two.
+        int: The minimum number of orbital transfers needed between YOU's and SAN's orbits.
     """
-    orbit_map = build_orbit_map(data_input)
     path_you = get_orbit_path(orbit_map, "YOU")
     path_san = get_orbit_path(orbit_map, "SAN")
 
@@ -118,7 +99,7 @@ def part_two(data_input: List[str]) -> int:
 
 
 if __name__ == "__main__":
-    input_data = get_input("inputs/6_input.txt")
+    input_data = load_orbit_map("inputs/6_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

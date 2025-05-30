@@ -9,61 +9,46 @@ Part 2: Strategy 2: Of all guards, which guard is most frequently asleep on the 
 Answer: 43695
 """
 
-from typing import List
+from typing import Tuple, Dict, List
 from collections import defaultdict
 import re
 from datetime import datetime
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def read_parse_and_process(file_path: str) -> Tuple[Dict[int, List[int]], Dict[int, int]]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file, parses each line into events, sorts them by timestamp,
+    and processes logs to calculate guard sleep patterns.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        Tuple[dict, dict]: 
+            - guard_sleep: dict with guard IDs as keys and lists of minute counts asleep.
+            - guard_totals: dict with guard IDs as keys and total minutes asleep.
     """
+    parsed_logs = []
     with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file]
+        for line in file:
+            line = line.strip()
+            timestamp_str, event = line[1:17], line[19:]
+            timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M")
+            guard_match = re.match(r"Guard #(\d+) begins shift", event)
+            guard_id = int(guard_match.group(1)) if guard_match else None
+            parsed_logs.append((timestamp, guard_id, event))
 
+    # Sort by timestamp
+    parsed_logs.sort(key=lambda x: x[0])
 
-def parse_event(line: str):
-    """
-    Parses a log line into a tuple of timestamp, guard ID (if any), and event type.
-
-    Args:
-        line (str): A single line from the log file.
-
-    Returns:
-        tuple: (datetime, guard_id (int or None), event_type (str))
-    """
-    timestamp_str, event = line[1:17], line[19:]
-    timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M")
-    guard_match = re.match(r"Guard #(\d+) begins shift", event)
-    guard_id = int(guard_match.group(1)) if guard_match else None
-    return timestamp, guard_id, event
-
-
-def process_logs(logs: List[str]):
-    """
-    Processes the sorted logs to calculate sleep patterns.
-
-    Args:
-        logs (List[str]): Sorted list of log entries.
-
-    Returns:
-        dict: Guard sleep data with guard IDs as keys and sleep minute counts as values.
-    """
     guard_sleep = defaultdict(lambda: [0] * 60)
     guard_totals = defaultdict(int)
     current_guard = None
     sleep_start = None
 
-    for timestamp, guard_id, event in map(parse_event, logs):
-        if guard_id:
+    for timestamp, guard_id, event in parsed_logs:
+        if guard_id is not None:
             current_guard = guard_id
         elif event == "falls asleep":
             sleep_start = timestamp.minute
@@ -76,41 +61,33 @@ def process_logs(logs: List[str]):
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(guard_sleep: dict, guard_totals: dict) -> int:
     """
-    Find the guard that has the most minutes asleep and find what minute does that guard spend asleep the most.
+    Find the guard with the most total minutes asleep, and the minute they are most asleep.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        guard_sleep (dict): Guard sleep data (guard_id -> list of minute counts).
+        guard_totals (dict): Total sleep per guard (guard_id -> total minutes asleep).
 
     Returns:
-        int: the ID of the guard times the minute he is asleep the most
+        int: guard ID multiplied by the minute they are asleep the most.
     """
-    logs = sorted(data_input)
-    guard_sleep, guard_totals = process_logs(logs)
-
-    # Find the guard with the most total sleep
     sleepiest_guard = max(guard_totals, key=guard_totals.get)
-    # Find the minute the sleepiest guard is most often asleep
     sleepiest_minute = guard_sleep[sleepiest_guard].index(max(guard_sleep[sleepiest_guard]))
     return sleepiest_guard * sleepiest_minute
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(guard_sleep: dict) -> int:
     """
-    Of all guards, which guard is most frequently asleep on the same minute?
-    
+    Find the guard most frequently asleep on the same minute.
+
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        guard_sleep (dict): Guard sleep data (guard_id -> list of minute counts).
 
     Returns:
-        int: the ID of the guard times the minute he is asleep the most
+        int: guard ID multiplied by the minute they are asleep the most frequently.
     """
-    logs = sorted(data_input)
-    guard_sleep, _ = process_logs(logs)
-
-    # Find the guard and minute with the most frequent sleep
     most_frequent_guard, most_frequent_minute = max(
         ((guard, minute) for guard, minutes in guard_sleep.items()
          for minute, count in enumerate(minutes) if count > 0),
@@ -120,7 +97,7 @@ def part_two(data_input: List[str]) -> int:
 
 
 if __name__ == "__main__":
-    input_data = get_input("inputs/4_input.txt")
+    sleep, total = read_parse_and_process("inputs/4_input.txt")
 
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    print(f"Part 1: {part_one(sleep, total)}")
+    print(f"Part 2: {part_two(sleep)}")

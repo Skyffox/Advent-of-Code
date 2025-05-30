@@ -27,68 +27,37 @@ def get_input(file_path: str) -> List[str]:
         return [line.strip() for line in file]
 
 
-def is_nice_part1(s: str) -> bool:
-    """
-    Determines if a string is 'nice' based on part 1 rules.
-
-    Args:
-        s (str): The string to check.
-
-    Returns:
-        bool: True if the string is nice, False otherwise.
-    """
-    vowels = "aeiou"
-    if sum(s.count(v) for v in vowels) < 3:
-        return False
-
-    if not any(s[i] == s[i + 1] for i in range(len(s) - 1)):
-        return False
-
-    if any(bad in s for bad in ["ab", "cd", "pq", "xy"]):
-        return False
-
-    return True
-
-
-def is_nice_part2(s: str) -> bool:
-    """
-    Determines if a string is 'nice' based on part 2 rules.
-
-    Args:
-        s (str): The string to check.
-
-    Returns:
-        bool: True if the string is nice, False otherwise.
-    """
-    # Check for a pair that appears at least twice without overlapping
-    pairs = {}
-    has_pair = False
-    for i in range(len(s) - 1):
-        pair = s[i:i + 2]
-        if pair in pairs and i - pairs[pair] > 1:
-            has_pair = True
-            break
-        if pair not in pairs:
-            pairs[pair] = i
-
-    # Check for a letter that repeats with exactly one letter between
-    has_repeat = any(s[i] == s[i + 2] for i in range(len(s) - 2))
-
-    return has_pair and has_repeat
-
-
 @profiler
 def part_one(data_input: List[str]) -> int:
     """
     Solves part one of the problem using the provided input data.
 
+    A string is considered 'nice' if:
+    - It contains at least three vowels (aeiou),
+    - It contains at least one letter that appears twice in a row,
+    - It does NOT contain the substrings: 'ab', 'cd', 'pq', or 'xy'.
+
+    This function counts how many input strings meet these criteria.
+
     Args:
         data_input (List[str]): A list of input lines from the puzzle input file.
 
     Returns:
-        int: The result for part one.
+        int: The number of nice strings.
     """
-    return sum(1 for line in data_input if is_nice_part1(line))
+    vowels = "aeiou"
+    forbidden = ["ab", "cd", "pq", "xy"]
+
+    def is_nice(s: str) -> bool:
+        if sum(s.count(v) for v in vowels) < 3:
+            return False
+        if not any(s[i] == s[i + 1] for i in range(len(s) - 1)):
+            return False
+        if any(bad in s for bad in forbidden):
+            return False
+        return True
+
+    return sum(1 for line in data_input if is_nice(line))
 
 
 @profiler
@@ -96,13 +65,37 @@ def part_two(data_input: List[str]) -> int:
     """
     Solves part two of the problem using the provided input data.
 
+    A string is considered 'nice' if:
+    - It contains a pair of any two letters that appears at least twice in the string without overlapping,
+    - It contains at least one letter which repeats with exactly one letter between them (e.g., 'xyx').
+
+    This function counts how many input strings meet these criteria.
+
     Args:
         data_input (List[str]): A list of input lines from the puzzle input file.
 
     Returns:
-        int: The result for part two.
+        int: The number of nice strings.
     """
-    return sum(1 for line in data_input if is_nice_part2(line))
+
+    def is_nice(s: str) -> bool:
+        # Check for a pair that appears at least twice without overlapping
+        pairs = {}
+        has_pair = False
+        for i in range(len(s) - 1):
+            pair = s[i:i + 2]
+            if pair in pairs and i - pairs[pair] > 1:
+                has_pair = True
+                break
+            if pair not in pairs:
+                pairs[pair] = i
+
+        # Check for a letter that repeats with exactly one letter between
+        has_repeat = any(s[i] == s[i + 2] for i in range(len(s) - 2))
+
+        return has_pair and has_repeat
+
+    return sum(1 for line in data_input if is_nice(line))
 
 
 if __name__ == "__main__":

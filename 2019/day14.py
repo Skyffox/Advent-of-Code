@@ -15,36 +15,30 @@ from collections import defaultdict
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_and_parse_reactions(file_path: str) -> Dict[str, Tuple[int, List[Tuple[int, str]]]]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and parses reaction rules into a dictionary.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file if line.strip()]
-
-
-def parse_reactions(data_input: List[str]) -> Dict[str, Tuple[int, List[Tuple[int, str]]]]:
-    """
-    Parses reaction rules into a dictionary.
-
-    Returns:
-        Dict[str, Tuple[int, List[Tuple[int, str]]]]: Maps chemical output to (amount produced, [(input_amount, input_chemical), ...])
+        Dict[str, Tuple[int, List[Tuple[int, str]]]]: Maps chemical output to 
+        (amount produced, [(input_amount, input_chemical), ...])
     """
     reactions = {}
-    for line in data_input:
-        inputs_part, output_part = line.split(" => ")
-        output_amount, output_chem = output_part.split()
-        inputs = []
-        for inp in inputs_part.split(", "):
-            amt, chem = inp.split()
-            inputs.append((int(amt), chem))
-        reactions[output_chem] = (int(output_amount), inputs)
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if not line:
+                continue
+            inputs_part, output_part = line.split(" => ")
+            output_amount, output_chem = output_part.split()
+            inputs = []
+            for inp in inputs_part.split(", "):
+                amt, chem = inp.split()
+                inputs.append((int(amt), chem))
+            reactions[output_chem] = (int(output_amount), inputs)
     return reactions
 
 
@@ -60,13 +54,12 @@ def ore_required(reactions: Dict[str, Tuple[int, List[Tuple[int, str]]]], fuel_a
         int: Amount of ORE required.
     """
     need = defaultdict(int)
-    need["FUEL"] = fuel_amount # Start by needing the desired amount of FUEL
-    leftovers = defaultdict(int) # Track leftover chemicals after reactions
+    need["FUEL"] = fuel_amount  # Start by needing the desired amount of FUEL
+    leftovers = defaultdict(int)  # Track leftover chemicals after reactions
 
     while True:
         # Find a chemical to process that's not ORE and needed > 0
         chem = next((c for c in need if c != "ORE" and need[c] > 0), None)
-        # No more chemicals needed except ORE, we are done
         if chem is None:
             break
 
@@ -82,54 +75,52 @@ def ore_required(reactions: Dict[str, Tuple[int, List[Tuple[int, str]]]], fuel_a
             need[chem] = 0
             continue
 
-        # Calculate how many times to run the reaction to meet or exceed qty_needed
         output_qty, inputs = reactions[chem]
         times = math.ceil(qty_needed / output_qty)
 
-        # Update leftovers: produced more than needed, so leftover is stored
         leftovers[chem] += times * output_qty - qty_needed
-        # Mark that we no longer need this chemical (need fulfilled)
         need[chem] = 0
 
-        # Add the input chemicals required for these reaction runs to the need list
         for amt, c in inputs:
             need[c] += amt * times
 
-    # After all processing, need["ORE"] contains the total raw ORE required
     return need["ORE"]
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
-
+def part_one(reactions: Dict[str, Tuple[int, List[Tuple[int, str]]]]) -> int:
     """
-    Solves part one: How much ORE needed for 1 FUEL.
+    Determines the minimum amount of ORE required to produce exactly 1 unit of FUEL.
+
+    This function calculates the total raw ORE needed by recursively resolving
+    the required chemicals using the reaction dependencies, accounting for leftovers.
 
     Args:
-        data_input (List[str]): Input reaction rules.
+        reactions (Dict[str, Tuple[int, List[Tuple[int, str]]]]): Reaction rules.
 
     Returns:
-        int: ORE required for 1 FUEL.
+        int: The minimum quantity of ORE needed to produce 1 FUEL.
     """
-    reactions = parse_reactions(data_input)
     return ore_required(reactions, 1)
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(reactions: Dict[str, Tuple[int, List[Tuple[int, str]]]]) -> int:
     """
-    Solves part two: Max FUEL producible with 1 trillion ORE.
+    Calculates the maximum amount of FUEL that can be produced with 1 trillion ORE.
+
+    Uses a binary search over possible FUEL amounts to find the highest quantity
+    producible without exceeding the given ORE limit.
 
     Args:
-        data_input (List[str]): Input reaction rules.
+        reactions (Dict[str, Tuple[int, List[Tuple[int, str]]]]): Reaction rules.
 
     Returns:
-        int: Maximum FUEL producible.
+        int: The maximum amount of FUEL producible from 1 trillion ORE.
     """
-    reactions = parse_reactions(data_input)
     trillion = 1_000_000_000_000
-
     low, high = 1, trillion
+
     while low < high:
         mid = (low + high + 1) // 2
         required = ore_required(reactions, mid)
@@ -141,7 +132,7 @@ def part_two(data_input: List[str]) -> int:
 
 
 if __name__ == "__main__":
-    input_data = get_input("inputs/14_input.txt")
+    input_data = get_and_parse_reactions("inputs/14_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

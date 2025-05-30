@@ -29,49 +29,29 @@ def get_input(file_path: str) -> List[int]:
 
 
 @profiler
-def part_one(program: List[str]) -> int:
+def run_diagnostic(program: List[int], system_id: int) -> int:
     """
-    Runs the Intcode program with input value 1 and returns the diagnostic code.
+    Runs the Intcode program with the specified system ID as input and returns the diagnostic code.
 
     Args:
-        program (List[int]): Intcode program.
+        program (List[int]): The Intcode program.
+        system_id (int): The input value to provide to the program (system ID).
 
     Returns:
-        int: Diagnostic code output.
+        int: The diagnostic code output produced by the program.
     """
     computer = IntcodeComputer(program.copy())
-    computer.add_input(1) # System ID for part 1
+    computer.add_input(system_id)
     output = None
     while not computer.halted:
         val = computer.run()
         if val is not None:
-            output = val # Last output value before halt
-    return output
-
-
-@profiler
-def part_two(program: List[int]) -> int:
-    """
-    Runs the Intcode program with input value 5 and returns the diagnostic code.
-
-    Args:
-        program (List[int]): Intcode program.
-
-    Returns:
-        int: Diagnostic code output.
-    """
-    computer = IntcodeComputer(program.copy())
-    computer.add_input(5) # System ID for part 2
-    output = None
-    while not computer.halted:
-        val = computer.run()
-        if val is not None:
-            output = val
+            output = val # Keep track of the last output before halt
     return output
 
 
 if __name__ == "__main__":
     input_data = get_input("inputs/5_input.txt")
 
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    print(f"Part 1: {run_diagnostic(input_data, system_id=1)}")
+    print(f"Part 2: {run_diagnostic(input_data, system_id=5)}")

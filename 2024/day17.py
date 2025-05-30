@@ -77,13 +77,26 @@ def part_1(program: List[int], register_a: int, register_b: int, register_c: int
 @profiler
 def part_2(program: List[int]) -> int:
     """
-    Determines the smallest initial value of register A that causes the program to output itself.
+    This was really nasty to figure out, so first I translated my puzzle input into pseudocode on paper. That looked like this:
+    B = A % 8
+    B = B ^ B
+    C = A >> B
+    A = A >> 3
+    B = B ^ C
+    A = A >> C
+    OUT B
+    if A != 0 JMP 0
 
-    Args:
-        program (List[int]): The program instructions (used also as the desired output).
+    From the pseudocode I noticed a couple of things: the program will only stop if A becomes 0 and since there is only one print 
+    command in the program, the whole program has to run 16 times to get the exact same input. And the value of the output is fully
+    determined by the value of A.
+    
+    I also noticed that A is divided by 2**3 (8, or bitshifted 3 times) every loop and basically keeps running until we hit 0. 
+    Furthermore, you can see that each iteration begins with 'B = A modulo 8'. If you put that together with the 'A = A // 8' that happens every loop, 
+    you can understand this as each loop "using up" the least significant digit of A.
 
-    Returns:
-        int: The smallest valid value for register A that produces the same output as the program.
+    So now we can work our way backwards through the expected output (the program), starting with an A value of 0, and see which of the 8 potential 
+    initial A values actually outputs the expected value.
     """
     register_a = 0
     for i in reversed(range(len(program))):

@@ -14,54 +14,54 @@ import re
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> List[Tuple[str, int, int, int, int]]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and parses each line into a tuple of action and coordinates.
+
+    Each instruction line is parsed into:
+        - action (str): One of 'on', 'off', or 'toggle'
+        - x1, y1, x2, y2 (int): Coordinates of the rectangular region
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file]
-
-
-def parse_instruction(line: str) -> Tuple[str, int, int, int, int]:
-    """
-    Parses a line of the input into an instruction and coordinates.
-
-    Args:
-        line (str): The input instruction line.
-
-    Returns:
-        tuple[str, int, int, int, int]: Action ('on', 'off', 'toggle') and coordinates (x1, y1, x2, y2).
+        List[Tuple[str, int, int, int, int]]: A list of parsed instructions.
     """
     pattern = r"(turn on|turn off|toggle) (\d+),(\d+) through (\d+),(\d+)"
-    match = re.match(pattern, line)
-    if not match:
-        raise ValueError(f"Invalid instruction line: {line}")
-    action = match.group(1).replace("turn ", "")
-    x1, y1, x2, y2 = map(int, match.groups()[1:])
-    return action, x1, y1, x2, y2
+    instructions = []
+
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            match = re.match(pattern, line)
+            if not match:
+                raise ValueError(f"Invalid instruction line: {line}")
+            action = match.group(1).replace("turn ", "")
+            x1, y1, x2, y2 = map(int, match.groups()[1:])
+            instructions.append((action, x1, y1, x2, y2))
+
+    return instructions
 
 
 @profiler
 def part_one(data_input: List[str]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    The grid is a 1000x1000 array of boolean values, where each light is either ON (True) or OFF (False).
+    Instructions modify the grid as follows:
+        - "turn on" sets lights in the region to ON,
+        - "turn off" sets lights in the region to OFF,
+        - "toggle" inverts the state of each light in the region.
 
     Args:
         data_input (List[str]): A list of input lines from the puzzle input file.
 
     Returns:
-        int: The result for part one.
+        int: The total number of lights that are ON after executing all instructions.
     """
     grid = [[False] * 1000 for _ in range(1000)]
 
-    for line in data_input:
-        action, x1, y1, x2, y2 = parse_instruction(line)
+    for action, x1, y1, x2, y2 in data_input:
         for x in range(x1, x2 + 1):
             for y in range(y1, y2 + 1):
                 if action == "on":
@@ -77,18 +77,21 @@ def part_one(data_input: List[str]) -> int:
 @profiler
 def part_two(data_input: List[str]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    The grid is a 1000x1000 array of integers representing brightness levels of lights.
+    Instructions modify the brightness as follows:
+        - "turn on" increases brightness by 1,
+        - "turn off" decreases brightness by 1, to a minimum of 0,
+        - "toggle" increases brightness by 2.
 
     Args:
         data_input (List[str]): A list of input lines from the puzzle input file.
 
     Returns:
-        int: The result for part two.
+        int: The total brightness of all lights after executing all instructions.
     """
     grid = [[0] * 1000 for _ in range(1000)]
 
-    for line in data_input:
-        action, x1, y1, x2, y2 = parse_instruction(line)
+    for action, x1, y1, x2, y2 in data_input:
         for x in range(x1, x2 + 1):
             for y in range(y1, y2 + 1):
                 if action == "on":

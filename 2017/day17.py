@@ -48,13 +48,32 @@ def part_one(step_size: int) -> int:
 @profiler
 def part_two(step_size: int) -> int:
     """
-    Finds the value after 0 after 50 million insertions (optimized).
+    Finds the value after 0 after 50 million insertions in the spinlock.
+
+    The spinlock algorithm inserts values into a circular buffer by moving forward
+    `step_size` steps and inserting the next value. Naively simulating all insertions
+    requires storing and updating a huge list, which is prohibitively expensive for
+    50 million insertions.
+
+    This optimized approach avoids storing the entire buffer by:
+    - Tracking only the current position (`pos`) of the insertion cursor.
+    - Keeping track of the buffer length (`length`), which grows by one each insertion.
+    - Recording the value inserted immediately after 0, since the problem asks only
+      for the value following 0 in the final buffer.
+    
+    How it works:
+    - The position `pos` is updated each iteration using modular arithmetic to simulate
+      movement around the circular buffer.
+    - When `pos == 1`, it means the new value is inserted immediately after 0.
+      The algorithm then updates `value_after_zero` to this newly inserted value.
+    - No actual list is maintained, so memory usage is constant.
+    - Each iteration runs in O(1) time, allowing 50 million iterations to complete efficiently.
 
     Args:
         step_size (int): Number of steps to move forward before inserting.
 
     Returns:
-        int: Value immediately after 0.
+        int: The value immediately following 0 after 50 million insertions.
     """
     pos = 0
     value_after_zero = None

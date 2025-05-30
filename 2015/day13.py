@@ -15,39 +15,35 @@ import itertools
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> Dict[str, Dict[str, int]]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and parses happiness preferences into a nested dictionary.
+
+    Each line describes the change in happiness between two people when seated together,
+    e.g., "Alice would gain 54 happiness units by sitting next to Bob."
+
+    Returns a structure like:
+    {
+        "Alice": {"Bob": 54, "Carol": -79, ...},
+        "Bob": {"Alice": 83, "David": -7, ...},
+        ...
+    }
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file]
-
-
-def parse_preferences(data: List[str]) -> Dict[str, Dict[str, int]]:
-    """
-    Parses the happiness preferences into a nested dictionary.
-
-    Args:
-        data (List[str]): Lines describing happiness effects.
-
-    Returns:
-        Dict[str, Dict[str, int]]: Mapping person -> neighbor -> happiness effect.
+        Dict[str, Dict[str, int]]: Mapping person -> neighbor -> happiness change.
     """
     preferences = {}
     pattern = re.compile(r"(\w+) would (gain|lose) (\d+) happiness units by sitting next to (\w+).")
-    for line in data:
-        match = pattern.match(line)
-        if not match:
-            continue
-        person, gain_lose, amount, neighbor = match.groups()
-        amount = int(amount) if gain_lose == "gain" else -int(amount)
-        preferences.setdefault(person, {})[neighbor] = amount
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            match = pattern.match(line.strip())
+            if match:
+                person, gain_lose, amount, neighbor = match.groups()
+                value = int(amount) if gain_lose == "gain" else -int(amount)
+                preferences.setdefault(person, {})[neighbor] = value
     return preferences
 
 
@@ -55,12 +51,14 @@ def calculate_happiness(arrangement: List[str], preferences: Dict[str, Dict[str,
     """
     Calculates the total happiness for a circular seating arrangement.
 
+    Each person contributes happiness based on both neighbors.
+
     Args:
-        arrangement (List[str]): Ordered list of people around the table.
-        preferences (Dict[str, Dict[str, int]]): Happiness mapping.
+        arrangement (List[str]): Ordered list of seated people.
+        preferences (Dict[str, Dict[str, int]]): Mapping of happiness values.
 
     Returns:
-        int: Total happiness for the arrangement.
+        int: Total happiness for the seating.
     """
     total = 0
     n = len(arrangement)
@@ -72,62 +70,58 @@ def calculate_happiness(arrangement: List[str], preferences: Dict[str, Dict[str,
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(preferences: Dict[str, Dict[str, int]]) -> int:
     """
-    Finds the optimal seating arrangement maximizing total happiness.
+    Finds the optimal circular seating arrangement (excluding yourself)
+    that maximizes the total happiness change, accounting for mutual effects
+    between adjacent guests. Uses symmetry optimization by fixing one person
+    and permuting the rest.
 
     Args:
-        data_input (List[str]): Input lines with preferences.
+        preferences (Dict[str, Dict[str, int]]): Happiness values for each neighbor pair.
 
     Returns:
-        int: Maximum total happiness.
+        int: Maximum total happiness for any valid arrangement.
     """
-    preferences = parse_preferences(data_input)
     people = list(preferences.keys())
-
-    # Fix one person to reduce permutations due to circular symmetry
     first = people[0]
     others = people[1:]
 
-    max_happiness = max(
+    return max(
         calculate_happiness([first] + list(p), preferences)
         for p in itertools.permutations(others)
     )
-    return max_happiness
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(preferences: Dict[str, Dict[str, int]]) -> int:
     """
-    Finds the optimal seating including yourself (0 happiness with others).
+    Adds yourself ("You") to the guest list with zero happiness change for all interactions.
+    Then computes the maximum happiness with the updated list using the same strategy
+    as part one.
 
     Args:
-        data_input (List[str]): Input lines with preferences.
+        preferences (Dict[str, Dict[str, int]]): Happiness values for each neighbor pair.
 
     Returns:
-        int: Maximum total happiness including yourself.
+        int: Maximum total happiness including yourself at the table.
     """
-    preferences = parse_preferences(data_input)
-    people = list(preferences.keys())
     you = "You"
+    people = list(preferences.keys())
 
-    # Add yourself with zero happiness effects to everyone
     preferences[you] = {}
     for person in people:
         preferences[person][you] = 0
         preferences[you][person] = 0
-
     people.append(you)
 
-    # Fix one person to reduce permutations due to circular symmetry
     first = people[0]
     others = people[1:]
 
-    max_happiness = max(
+    return max(
         calculate_happiness([first] + list(p), preferences)
         for p in itertools.permutations(others)
     )
-    return max_happiness
 
 
 if __name__ == "__main__":

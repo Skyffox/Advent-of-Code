@@ -34,7 +34,7 @@ def get_input(file_path: str) -> List[Tuple[List[str], int, int, str]]:
 
             # Extract rule and split into lowerbound, upperbound and letter
             rule = line[0].split(" ")
-            lowerbound, upperbound = map(int, rule[0].split("-"))            
+            lowerbound, upperbound = map(int, rule[0].split("-"))
             password = line[1].strip()
 
             lst.append([rule, lowerbound, upperbound, password])
@@ -60,7 +60,7 @@ def part_1(lst: List[Tuple[List[str], int, int, str]]) -> int:
         letter = rule[1]
         if lower_b <= password.count(letter) <= upper_b:
             valid_count += 1
-    
+
     return valid_count
 
 
@@ -83,7 +83,7 @@ def part_2(lst: List[Tuple[List[str], int, int, str]]) -> int:
         # Check if only one of the specified positions contains the letter
         if (password[lower_b - 1] == letter) != (password[upper_b - 1] == letter):
             valid_count += 1
-    
+
     return valid_count
 
 

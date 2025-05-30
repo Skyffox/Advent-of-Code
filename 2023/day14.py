@@ -9,40 +9,29 @@ Part 2: After 1 billion full spin cycles (tilting N, W, S, E), compute the total
 Answer: 87273
 """
 
-from typing import List, Set, Tuple
+from typing import Set, Tuple
 from utils import profiler
 
 Position = Tuple[int, int]
 
 
-def get_input(file_path: str) -> List[str]:
+def load_and_parse_input(file_path: str) -> Tuple[Set[Position], Set[Position], int, int]:
     """
-    Reads the puzzle input from a file.
+    Reads the puzzle input and parses the grid into rock positions and dimensions.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        List[str]: List of strings representing the puzzle grid.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file]
-
-
-def parse(data: List[str]) -> Tuple[Set[Position], Set[Position], int, int]:
-    """
-    Parses the input grid into sets of round and cube rock positions.
-
-    Args:
-        data (List[str]): Grid represented as a list of strings.
-
-    Returns:
         Tuple:
             - Set[Position]: Coordinates of round rocks ('O').
             - Set[Position]: Coordinates of cube rocks ('#').
-            - int: Number of columns.
-            - int: Number of rows.
+            - int: Number of columns in the grid.
+            - int: Number of rows in the grid.
     """
+    with open(file_path, "r", encoding="utf-8") as file:
+        data = [line.strip() for line in file]
+
     round_rocks = set()
     cube_rocks = set()
     for y, row in enumerate(data):
@@ -51,6 +40,7 @@ def parse(data: List[str]) -> Tuple[Set[Position], Set[Position], int, int]:
                 round_rocks.add((x, y))
             elif ch == '#':
                 cube_rocks.add((x, y))
+
     return round_rocks, cube_rocks, len(data[0]), len(data)
 
 
@@ -110,59 +100,71 @@ def get_load(rounds: Set[Position], rows: int) -> int:
 
 
 @profiler
-def part_one(data: List[str]) -> int:
+def part_one(data: Tuple[Set[Position], Set[Position], int, int]) -> int:
     """
-    Solves Part 1: compute the load after tilting north once.
+    Compute the load after tilting north once.
 
     Args:
-        data (List[str]): The input puzzle grid.
+        data (Tuple): Parsed input containing rock positions and grid size.
 
     Returns:
         int: Total load on the support beams.
     """
-    rounds, cubes, cols, rows = parse(data)
+    rounds, cubes, cols, rows = data
     rounds = tilt(rounds, cubes, cols, rows)
     return get_load(rounds, rows)
 
 
 @profiler
-def part_two(data: List[str]) -> int:
+def part_two(data: Tuple[Set[Position], Set[Position], int, int]) -> int:
     """
-    Solves Part 2: simulates 1 billion spin cycles with cycle detection.
+    Solves Part 2: simulates 1 billion spin cycles with cycle detection and fast-forward.
 
-    Each cycle consists of four tilt-rotate operations (N → W → S → E).
-    Once a repeating state is found, fast-forwards to the final state.
+    Each cycle consists of four tilt-rotate steps (north, west, south, east).
+
+    Cycle detection:
+    - Track each unique arrangement of round rocks.
+    - If a previously seen state recurs, a cycle (loop) is detected.
+    - Use the loop length to jump ahead, avoiding simulating all billion cycles.
 
     Args:
-        data (List[str]): The input puzzle grid.
+        data (Tuple): Parsed input containing rock positions and grid size.
 
     Returns:
         int: Total load on the support beams after all cycles.
     """
-    rounds, cubes, cols, rows = parse(data)
+    rounds, cubes, cols, rows = data
     seen = {}
     history = []
 
     for cycle in range(1_000_000_000):
         state = frozenset(rounds)
+
         if state in seen:
+            # Cycle detected!
             loop_start = seen[state]
             loop_len = cycle - loop_start
+            # Calculate remaining steps after fast-forwarding
             remaining = (1_000_000_000 - loop_start) % loop_len
+            # Return the load from the state corresponding to the remainder
             return history[loop_start + remaining]
+
+        # Record the current state and load
         seen[state] = cycle
         history.append(get_load(rounds, rows))
 
+        # Perform one full spin cycle (N, W, S, E)
         for _ in range(4):
             rounds = tilt(rounds, cubes, cols, rows)
             rounds = rotate_clockwise(rounds, cols)
             cubes = rotate_clockwise(cubes, cols)
 
+    # If no cycle detected (unlikely), return load after all cycles
     return get_load(rounds, rows)
 
 
 if __name__ == "__main__":
-    input_data = get_input("inputs/14_input.txt")
+    input_data = load_and_parse_input("inputs/14_input.txt")
 
     print(f"Part 1: {part_one(input_data)}")
     print(f"Part 2: {part_two(input_data)}")

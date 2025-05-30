@@ -40,22 +40,25 @@ def get_input(file_path: str) -> List[Dict[str, str]]:
                 passports.append(passport)
                 passport = {}
 
-    if passport:  # Add last passport if file didn't end with newline
+    if passport: # Add last passport if file didn't end with newline
         passports.append(passport)
 
     return passports
 
 
 @profiler
-def part_one(passports: List[str]) -> int:
+def part_one(passports: List[dict]) -> int:
     """
-    Solves part one of the problem using the provided input data.
+    Counts how many passports have all the required fields.
+
+    The required fields are: byr, iyr, eyr, hgt, hcl, ecl, pid.
+    This function checks only the presence of these fields, not their validity.
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        passports (List[dict]): List of passport dictionaries to validate.
 
     Returns:
-        int: The result for part one.
+        int: Number of passports containing all required fields.
     """
     required_fields = {"byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"}
     valid_count = 0
@@ -68,38 +71,62 @@ def part_one(passports: List[str]) -> int:
 
 
 @profiler
-def part_two(passports: List[str]) -> int:
+def part_two(passports: List[dict]) -> int:
     """
-    Solves part two of the problem using the provided input data.
+    Counts how many passports are valid including field value validation.
+
+    Checks for presence of all required fields and validates each field:
+    - byr: four digits; 1920 <= byr <= 2002
+    - iyr: four digits; 2010 <= iyr <= 2020
+    - eyr: four digits; 2020 <= eyr <= 2030
+    - hgt: number + "cm" or "in"; 150-193 cm or 59-76 in
+    - hcl: a '#' followed by exactly six hex chars
+    - ecl: one of specified eye colors
+    - pid: a nine-digit number, including leading zeroes
 
     Args:
-        data_input (List[str]): A list of input lines from the puzzle input file.
+        passports (List[dict]): List of passport dictionaries to validate.
 
     Returns:
-        int: The result for part two.
+        int: Number of passports that pass all validation checks.
     """
     required_fields = {"byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"}
 
     def is_valid(passport):
         try:
+            # Validate birth year
             byr = 1920 <= int(passport["byr"]) <= 2002
+            # Validate issue year
             iyr = 2010 <= int(passport["iyr"]) <= 2020
+            # Validate expiration year
             eyr = 2020 <= int(passport["eyr"]) <= 2030
+
+            # Validate height with units
             hgt = (
-                (passport["hgt"][-2:] == "cm" and 150 <= int(passport["hgt"][:-2]) <= 193)
+                (passport["hgt"].endswith("cm") and 150 <= int(passport["hgt"][:-2]) <= 193)
                 or
-                (passport["hgt"][-2:] == "in" and 59 <= int(passport["hgt"][:-2]) <= 76)
+                (passport["hgt"].endswith("in") and 59 <= int(passport["hgt"][:-2]) <= 76)
             )
+
+            # Validate hair color format
             hcl = bool(re.match(r"^#[0-9a-f]{6}$", passport["hcl"]))
+
+            # Validate eye color membership
             ecl = passport["ecl"] in {"amb", "blu", "brn", "gry", "grn", "hzl", "oth"}
+
+            # Validate passport ID format
             pid = bool(re.match(r"^\d{9}$", passport["pid"]))
+
             return byr and iyr and eyr and hgt and hcl and ecl and pid
+
         except KeyError:
+            # Missing required field(s)
             return False
 
     valid_count = 0
 
     for passport in passports:
+        # Check required fields present and validate values
         if required_fields <= passport.keys() and is_valid(passport):
             valid_count += 1
 

@@ -73,7 +73,6 @@ def part_two(adapters: List[int]) -> int:
     return paths[adapters[-1]]
 
 
-
 if __name__ == "__main__":
     input_data = get_input("inputs/10_input.txt")
 

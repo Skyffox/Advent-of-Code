@@ -14,59 +14,50 @@ import re
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def load_aunts(file_path: str) -> List[Dict[str, int]]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file, parses each Aunt Sue's attributes into dictionaries.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
+        List[Dict[str, int]]: List of dictionaries, each representing
+            an Aunt Sue's known attributes.
     """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file]
-
-
-def parse_aunts(data: List[str]) -> List[Dict[str, int]]:
-    """
-    Parses each Aunt Sue's description into a dictionary.
-
-    Args:
-        data (List[str]): List of lines describing each Aunt Sue.
-
-    Returns:
-        List[Dict[str, int]]: List of dictionaries of Aunt Sue's attributes.
-    """
-    aunts = []
     pattern = re.compile(r"Sue \d+: (.+)")
-    for line in data:
-        match = pattern.match(line)
-        if not match:
-            continue
-        attributes_part = match.group(1)
-        attributes = {}
-        for attr in attributes_part.split(", "):
-            key, value = attr.split(": ")
-            attributes[key] = int(value)
-        aunts.append(attributes)
+    aunts = []
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            match = pattern.match(line)
+            if not match:
+                continue
+            attributes_part = match.group(1)
+            attributes = {}
+            for attr in attributes_part.split(", "):
+                key, value = attr.split(": ")
+                attributes[key] = int(value)
+            aunts.append(attributes)
     return aunts
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(file_path: str) -> int:
     """
-    Finds the Aunt Sue that matches the gift giver's attributes exactly.
+    Identifies the Aunt Sue whose attributes exactly match the known gift giver's attributes.
+
+    The known gift attributes are compared exactly against each Sue's attributes.
+    Any attribute not specified in a Sue's description is ignored.
 
     Args:
-        data_input (List[str]): Input lines describing Aunt Sues.
+        file_path (str): Path to the input file describing Aunt Sues.
 
     Returns:
-        int: The number of the matching Aunt Sue.
+        int: The number of the Aunt Sue matching the gift attributes exactly.
     """
-    aunts = parse_aunts(data_input)
+    aunts = load_aunts(file_path)
 
-    # Gift giver's known attributes
     gift = {
         "children": 3,
         "cats": 7,
@@ -84,23 +75,28 @@ def part_one(data_input: List[str]) -> int:
         if all(aunt.get(k, v) == v for k, v in gift.items()):
             return i
 
-
     return -1
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(file_path: str) -> int:
     """
-    Finds the Aunt Sue that matches the gift giver's attributes with
-    modified comparison rules.
+    Identifies the Aunt Sue who matches the gift giver's attributes with
+    modified comparison rules:
+
+      - For "cats" and "trees", the Sue's value must be greater than the gift's.
+      - For "pomeranians" and "goldfish", the Sue's value must be less than the gift's.
+      - For all other attributes, the Sue's value must be exactly equal.
+
+    Any attribute not present in a Sue's description is ignored.
 
     Args:
-        data_input (List[str]): Input lines describing Aunt Sues.
+        file_path (str): Path to the input file describing Aunt Sues.
 
     Returns:
-        int: The number of the matching Aunt Sue.
+        int: The number of the Aunt Sue matching the gift attributes with modified rules.
     """
-    aunts = parse_aunts(data_input)
+    aunts = load_aunts(file_path)
 
     gift = {
         "children": 3,
@@ -137,7 +133,5 @@ def part_two(data_input: List[str]) -> int:
 
 
 if __name__ == "__main__":
-    input_data = get_input("inputs/16_input.txt")
-
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    print(f"Part 1: {part_one('inputs/16_input.txt')}")
+    print(f"Part 2: {part_two('inputs/16_input.txt')}")

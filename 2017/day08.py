@@ -2,15 +2,15 @@
 """
 Day 8: I Heard You Like Registers
 
-Part 1: What is the largest value in any register after completing the instructions in your puzzle input?
+Part 1: What is the largest value in any register after completing the instructions?
 Answer: 3745
 
-Part 2: To be safe, the CPU also needs to know the highest value held in any register during this process so that it can decide how much memory to allocate to these operations.
+Part 2: What is the highest value held in any register during the process?
 Answer: 4644
 """
 
 import operator
-from typing import List, Dict
+from typing import List, Tuple, Dict
 from utils import profiler
 
 
@@ -29,15 +29,17 @@ def get_input(file_path: str) -> List[str]:
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def run_instructions(data_input: List[str]) -> Tuple[int, int]:
     """
-    Executes instructions and returns largest register value after completion.
+    Executes instructions and returns:
+      - The largest value in any register after completion.
+      - The highest value ever held in any register during processing.
 
     Args:
         data_input (List[str]): List of instruction strings.
 
     Returns:
-        int: Largest value in any register after processing.
+        Tuple[int, int]: (largest final register value, highest value during execution)
     """
     registers: Dict[str, int] = {}
     ops = {
@@ -49,16 +51,16 @@ def part_one(data_input: List[str]) -> int:
         '!=': operator.ne,
     }
 
+    max_value_ever = float('-inf')
+
     for line in data_input:
-        parts = line.split()
-        reg, op, val, _, cond_reg, cond_op, cond_val = parts
+        reg, op, val, _, cond_reg, cond_op, cond_val = line.split()
         val = int(val)
         cond_val = int(cond_val)
 
-        if cond_reg not in registers:
-            registers[cond_reg] = 0
-        if reg not in registers:
-            registers[reg] = 0
+        # Initialize registers if not seen
+        registers.setdefault(cond_reg, 0)
+        registers.setdefault(reg, 0)
 
         if ops[cond_op](registers[cond_reg], cond_val):
             if op == 'inc':
@@ -66,57 +68,17 @@ def part_one(data_input: List[str]) -> int:
             else:
                 registers[reg] -= val
 
-    return max(registers.values()) if registers else 0
+            # Track highest value ever seen
+            max_value_ever = max(max_value_ever, registers[reg])
 
-
-@profiler
-def compute(data_input: List[str]) -> int:
-    """
-    Executes instructions and returns highest value ever held in any register.
-
-    Args:
-        data_input (List[str]): List of instruction strings.
-
-    Returns:
-        int: Highest value ever held during processing.
-    """
-    registers: Dict[str, int] = {}
-    ops = {
-        '>': operator.gt,
-        '<': operator.lt,
-        '>=': operator.ge,
-        '<=': operator.le,
-        '==': operator.eq,
-        '!=': operator.ne,
-    }
-
-    max_value = float('-inf')
-
-    for line in data_input:
-        parts = line.split()
-        reg, op, val, _, cond_reg, cond_op, cond_val = parts
-        val = int(val)
-        cond_val = int(cond_val)
-
-        if cond_reg not in registers:
-            registers[cond_reg] = 0
-        if reg not in registers:
-            registers[reg] = 0
-
-        if ops[cond_op](registers[cond_reg], cond_val):
-            if op == 'inc':
-                registers[reg] += val
-            else:
-                registers[reg] -= val
-            max_value = max(max_value, *registers.values())
-
-    return max(registers.values()), max_value
+    largest_final_value = max(registers.values()) if registers else 0
+    return largest_final_value, max_value_ever
 
 
 if __name__ == "__main__":
     input_data = get_input("inputs/8_input.txt")
 
-    register_part1, register_part2 = compute(input_data)
+    part1_result, part2_result = run_instructions(input_data)
 
-    print(f"Part 1: {register_part1}")
-    print(f"Part 2: {register_part2}")
+    print(f"Part 1: {part1_result}")
+    print(f"Part 2: {part2_result}")

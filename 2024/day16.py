@@ -16,10 +16,16 @@ from utils import profiler
 
 def get_input(file_path: str) -> Tuple[List[str], Tuple[int, int], Tuple[int, int]]:
     """
-    Parse the maze input and extract the start and end positions.
+    Parses the maze grid from the input file and locates start and end positions.
+
+    Args:
+        file_path (str): Path to the maze input file.
 
     Returns:
-        tuple[list[str], tuple[int, int], tuple[int, int]]: Grid lines, start (row, col), end (row, col).
+        Tuple containing:
+            - grid (List[str]): Maze rows as strings.
+            - start (Tuple[int, int]): Coordinates (row, col) of the start position marked 'S'.
+            - end (Tuple[int, int]): Coordinates (row, col) of the end position marked 'E'.
     """
     grid = []
     start, end = (0, 0), (0, 0)
@@ -38,87 +44,130 @@ def get_input(file_path: str) -> Tuple[List[str], Tuple[int, int], Tuple[int, in
 @profiler
 def part_1(grid: List[str], start: Tuple[int, int], end: Tuple[int, int]) -> int:
     """
-    Find the path with the lowest score from start to end in the maze.
-    Moving straight costs 1. Turning left or right costs 1000.
-    Uses Dijkstra's algorithm variant to track minimal path cost based on direction.
+    Computes the minimum score path from start to end in the maze.
+
+    Scoring rules:
+        - Moving forward one tile costs 1 point.
+        - Turning left or right costs 1000 points.
+    
+    Uses a modified Dijkstra's algorithm that keeps track of direction to
+    correctly accumulate turn costs.
+
+    Args:
+        grid (List[str]): Maze grid.
+        start (Tuple[int, int]): Start coordinates.
+        end (Tuple[int, int]): End coordinates.
 
     Returns:
-        int: Minimum score to reach the end.
+        int: The minimum score required to reach the end.
     """
+    # Replace 'E' with '.' to allow traversal
     grid[end[0]] = grid[end[0]].replace('E', '.')
+
+    # Directions encoded as: 0=right, 1=down, 2=left, 3=up
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    heap = [(0, 0, *start)] # (score, direction, row, col)
+
+    # Heap entries: (score, direction, row, col)
+    heap = [(0, 0, *start)]
     visited = set()
 
     while heap:
         score, d, i, j = heappop(heap)
+
+        # Stop if reached end
         if (i, j) == end:
-            break
+            return score
 
         if (d, i, j) in visited:
             continue
         visited.add((d, i, j))
 
-        # Forward movement
-        x = i + directions[d][0]
-        y = j + directions[d][1]
+        # Attempt to move forward in current direction
+        x, y = i + directions[d][0], j + directions[d][1]
         if grid[x][y] == '.' and (d, x, y) not in visited:
             heappush(heap, (score + 1, d, x, y))
 
-        # Turn left
+        # Turn left (adds 1000 to score)
         left = (d - 1) % 4
         if (left, i, j) not in visited:
             heappush(heap, (score + 1000, left, i, j))
 
-        # Turn right
+        # Turn right (adds 1000 to score)
         right = (d + 1) % 4
         if (right, i, j) not in visited:
             heappush(heap, (score + 1000, right, i, j))
-
-    return score
 
 
 @profiler
 def part_2(grid: List[str], start: Tuple[int, int], end: Tuple[int, int]) -> int:
     """
-    Find how many tiles are on at least one path with the lowest score.
-    Tracks all optimal paths and counts unique tiles that are part of any such path.
+    Determines how many unique tiles lie on at least one optimal (lowest-score) path.
+
+    This function explores all optimal paths by:
+        - Tracking path sets in the heap.
+        - Keeping only paths with scores <= the best known score.
+        - Collecting all tiles visited in any of these best paths.
+
+    Args:
+        grid (List[str]): Maze grid.
+        start (Tuple[int, int]): Start coordinates.
+        end (Tuple[int, int]): End coordinates.
 
     Returns:
-        int: Number of unique tiles involved in any best path.
+        int: Count of unique tiles that appear on any lowest-cost path.
     """
+    # Replace 'E' with '.' to allow traversal
     grid[end[0]] = grid[end[0]].replace('E', '.')
 
+    # Memoization to avoid processing states with worse scores
+    visited = {}
+
     def can_visit(d: int, i: int, j: int, score: int) -> bool:
+        """
+        Check if the current state (direction and position) can be visited
+        with a better or equal score.
+
+        Args:
+            d (int): Current direction.
+            i (int): Row coordinate.
+            j (int): Column coordinate.
+            score (int): Current path score.
+
+        Returns:
+            bool: True if this state is either not visited or can be visited with
+                  a better (lower or equal) score.
+        """
         prev_score = visited.get((d, i, j))
-        if prev_score and prev_score < score:
+        if prev_score is not None and prev_score < score:
             return False
         visited[(d, i, j)] = score
         return True
 
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-    heap = [(0, 0, *start, {start})] # (score, dir, row, col, path_set)
-    visited = {}
+
+    # Heap entries: (score, direction, row, col, path_set)
+    heap = [(0, 0, *start, {start})]
     lowest_score = None
-    winning_paths = set()
+    winning_paths_tiles = set()
 
     while heap:
         score, d, i, j, path = heappop(heap)
 
-        if lowest_score and score > lowest_score:
+        # If we have found a better solution, discard worse paths
+        if lowest_score is not None and score > lowest_score:
             break
 
+        # Reached end - update lowest_score and accumulate path tiles
         if (i, j) == end:
             lowest_score = score
-            winning_paths |= path
+            winning_paths_tiles |= path
             continue
 
         if not can_visit(d, i, j, score):
             continue
 
-        # Forward movement
-        x = i + directions[d][0]
-        y = j + directions[d][1]
+        # Move forward
+        x, y = i + directions[d][0], j + directions[d][1]
         if grid[x][y] == '.' and can_visit(d, x, y, score + 1):
             heappush(heap, (score + 1, d, x, y, path | {(x, y)}))
 
@@ -132,7 +181,7 @@ def part_2(grid: List[str], start: Tuple[int, int], end: Tuple[int, int]) -> int
         if can_visit(right, i, j, score + 1000):
             heappush(heap, (score + 1000, right, i, j, path))
 
-    return len(winning_paths)
+    return len(winning_paths_tiles)
 
 
 if __name__ == "__main__":

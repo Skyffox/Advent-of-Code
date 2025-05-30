@@ -9,115 +9,111 @@ Part 2: Again given the descriptions of each reindeer, after exactly 2503 second
 Answer: 1059
 """
 
-from typing import List, Dict
+from typing import Dict
 import re
 from utils import profiler
 
 
-def get_input(file_path: str) -> List[str]:
+def get_input(file_path: str) -> Dict[str, Dict[str, int]]:
     """
-    Reads the input file and returns a list of stripped lines.
+    Reads the input file and parses reindeer statistics.
+
+    Each line describes a reindeer's flying speed, flying duration, and resting duration.
 
     Args:
         file_path (str): Path to the input text file.
 
     Returns:
-        list[str]: A list of lines with leading/trailing whitespace removed.
-    """
-    with open(file_path, "r", encoding="utf-8") as file:
-        return [line.strip() for line in file]
-
-
-def parse_reindeer(data: List[str]) -> Dict[str, Dict[str, int]]:
-    """
-    Parses each reindeer's stats: speed, fly time, rest time.
-
-    Args:
-        data (List[str]): Input lines describing reindeer capabilities.
-
-    Returns:
-        Dict[str, Dict[str, int]]: Mapping reindeer name to their stats.
+        Dict[str, Dict[str, int]]: Mapping of reindeer name to their stats:
+            {
+                "speed": int (km/s),
+                "fly_time": int (seconds),
+                "rest_time": int (seconds)
+            }
     """
     pattern = re.compile(
         r"(\w+) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds."
     )
     reindeer_stats = {}
-    for line in data:
-        match = pattern.match(line)
-        if match:
-            name, speed, fly_time, rest_time = match.groups()
-            reindeer_stats[name] = {
-                "speed": int(speed),
-                "fly_time": int(fly_time),
-                "rest_time": int(rest_time),
-            }
+    with open(file_path, "r", encoding="utf-8") as file:
+        for line in file:
+            match = pattern.match(line.strip())
+            if match:
+                name, speed, fly_time, rest_time = match.groups()
+                reindeer_stats[name] = {
+                    "speed": int(speed),
+                    "fly_time": int(fly_time),
+                    "rest_time": int(rest_time),
+                }
     return reindeer_stats
 
 
 def distance_after_time(stats: Dict[str, int], total_time: int) -> int:
     """
-    Calculates distance traveled by a reindeer after given total time.
+    Computes the distance a reindeer travels in total_time seconds.
+
+    The reindeer alternates between flying and resting. It flies at constant speed
+    for `fly_time` seconds, then rests for `rest_time` seconds, repeating this cycle.
 
     Args:
-        stats (Dict[str, int]): Dictionary with speed, fly_time, rest_time.
-        total_time (int): Total race time in seconds.
+        stats (Dict[str, int]): Reindeer stats including 'speed', 'fly_time', 'rest_time'.
+        total_time (int): Total elapsed time in seconds.
 
     Returns:
-        int: Distance traveled.
+        int: Total distance traveled in kilometers.
     """
-    cycle_time = stats["fly_time"] + stats["rest_time"]
-    full_cycles = total_time // cycle_time
-    remainder = total_time % cycle_time
-    flying_time = full_cycles * stats["fly_time"] + min(remainder, stats["fly_time"])
-    return flying_time * stats["speed"]
+    cycle_duration = stats["fly_time"] + stats["rest_time"]
+    full_cycles = total_time // cycle_duration
+    remainder = total_time % cycle_duration
+    flying_seconds = full_cycles * stats["fly_time"] + min(remainder, stats["fly_time"])
+    return flying_seconds * stats["speed"]
 
 
 @profiler
-def part_one(data_input: List[str]) -> int:
+def part_one(reindeer: Dict[str, Dict[str, int]]) -> int:
     """
-    Determines the maximum distance traveled by any reindeer after 2503 seconds.
+    Determines which reindeer has traveled the farthest after 2503 seconds.
+    Uses direct calculation based on reindeer's flying/resting cycles.
 
     Args:
-        data_input (List[str]): Input lines describing reindeer capabilities.
+        reindeer (Dict[str, Dict[str, int]]): Parsed reindeer statistics.
 
     Returns:
-        int: Maximum distance traveled.
+        int: Maximum distance traveled by any reindeer.
     """
-    reindeer = parse_reindeer(data_input)
     race_time = 2503
-    distances = [distance_after_time(stats, race_time) for stats in reindeer.values()]
-    return max(distances)
+    return max(distance_after_time(stats, race_time) for stats in reindeer.values())
 
 
 @profiler
-def part_two(data_input: List[str]) -> int:
+def part_two(reindeer: Dict[str, Dict[str, int]]) -> int:
     """
-    Simulates the race second-by-second and awards points for leading reindeer.
+    Simulates the race second-by-second, awarding points each second to the
+    reindeer(s) currently in the lead.
 
     Args:
-        data_input (List[str]): Input lines describing reindeer capabilities.
+        reindeer (Dict[str, Dict[str, int]]): Parsed reindeer statistics.
 
     Returns:
-        int: Maximum points earned by any reindeer.
+        int: Highest points earned by any reindeer at race end.
     """
-    reindeer = parse_reindeer(data_input)
     race_time = 2503
     scores = {name: 0 for name in reindeer}
 
-    for t in range(1, race_time + 1):
+    for second in range(1, race_time + 1):
         distances = {
-            name: distance_after_time(stats, t) for name, stats in reindeer.items()
+            name: distance_after_time(stats, second) for name, stats in reindeer.items()
         }
-        max_dist = max(distances.values())
+        max_distance = max(distances.values())
         for name, dist in distances.items():
-            if dist == max_dist:
+            if dist == max_distance:
                 scores[name] += 1
 
     return max(scores.values())
 
 
 if __name__ == "__main__":
-    input_data = get_input("inputs/14_input.txt")
+    reindeer_data = get_input("inputs/14_input.txt")
 
-    print(f"Part 1: {part_one(input_data)}")
-    print(f"Part 2: {part_two(input_data)}")
+    print(f"Part 1: {part_one(reindeer_data)}")
+    print(f"Part 2: {part_two(reindeer_data)}")
