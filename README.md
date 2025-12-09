@@ -5,6 +5,8 @@ The goal is to keep my programming knowledge fresh. I love how most of the AoC p
 
 I try not to use any libraries to make things short or predefined algorithms and just stick to what native Python provides. 
 
+From 2025 and onward there were only 12 days.
+
 ## Stars Achieved
 ```
      01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
@@ -18,4 +20,5 @@ I try not to use any libraries to make things short or predefined algorithms and
 2022 ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
 2023 ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
 2024 ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
+2025 ** ** ** ** ** ** ** 
 ```
